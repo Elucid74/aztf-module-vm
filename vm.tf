@@ -100,6 +100,15 @@ resource "azurerm_virtual_machine" "vm" {
 	network_interface_ids   = [element(concat(azurerm_network_interface.nic.*.id, list("")), count.index)]
 }
 
+resource "azurerm_network_interface_backend_address_pool_association" "association" {
+  count = var.lb_backend_address_pool_id == null ? 0 : var.vm_num
+
+  network_interface_id    = element(azurerm_network_interface.nic1.*.id, count.index)
+  ip_configuration_name = "ipconfig0"
+  backend_address_pool_id = var.lb_backend_address_pool_id
+}
+
+
 locals {
 	wadlogs               = file("${path.module}/wadlogs.xml.tpl")
 	wadperfcounters1      = file("${path.module}/wadperfcounters1.xml.tpl")

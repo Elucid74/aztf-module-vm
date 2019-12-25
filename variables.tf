@@ -106,3 +106,8 @@ variable "enable_dependency_agent" {
   default = false
 }
 
+variable "lb_backend_address_pool_id" {
+  description = "load balancer backend address pool id to associate with" 
+  default = null
+}
+
