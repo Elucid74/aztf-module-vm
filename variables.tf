@@ -111,3 +111,7 @@ variable "lb_backend_address_pool_id" {
   default = null
 }
 
+variable "dependencies" {
+  type    = "list"
+  default = []
+}
