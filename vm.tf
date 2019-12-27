@@ -103,8 +103,8 @@ resource "azurerm_virtual_machine" "vm" {
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "association" {
-  count = var.vm_num
-  #count = var.lb_backend_address_pool_id == null ? 0 : var.vm_num
+  #count = var.vm_num
+  count = var.lb_backend_address_pool_id == null ? 0 : var.vm_num
 
   network_interface_id    = element(azurerm_network_interface.nic.*.id, count.index)
   ip_configuration_name = "ipconfig0"
