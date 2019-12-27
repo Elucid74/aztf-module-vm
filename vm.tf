@@ -6,11 +6,6 @@ locals {
   vm_name = "${var.prefix}-${var.vm_name}"
 }
 
-resource "null_resource" "dependency_getter" {
-  provisioner "local-exec" {
-    command = "echo ${length(var.dependencies)}"
-  }
-}
 
 resource "azurerm_availability_set" "avset" {
 #	count                         = var.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
@@ -115,7 +110,6 @@ resource "azurerm_network_interface_backend_address_pool_association" "associati
   ip_configuration_name = "ipconfig0"
   backend_address_pool_id = var.lb_backend_address_pool_id
 
-  depends_on    = ["null_resource.dependency_getter"]
 }
 
 
