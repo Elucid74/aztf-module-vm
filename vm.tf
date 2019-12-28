@@ -74,6 +74,7 @@ resource "azurerm_virtual_machine" "vm" {
 		computer_name 		    = format("%s-%02d", local.vm_name, count.index + 1)
     admin_username        = var.admin_username
     admin_password        = var.admin_password
+    custom_data           = var.custom_data == NULL? null : filebase64(var.custom_data)
 	}
   
   dynamic "os_profile_windows_config" {

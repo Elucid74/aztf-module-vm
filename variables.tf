@@ -76,6 +76,11 @@ variable "boot_diagnostics_endpoint" {
   default = null        
 }
 
+variable "custom_data" {
+  description = "local path to custom data file for cloud_init"
+  default = null
+}
+
 variable "diag_storage_account_name"        {
   description = "storage account name for diagnostics log"
   default = null      
