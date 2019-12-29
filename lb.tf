@@ -30,8 +30,6 @@ resource "azurerm_lb_backend_address_pool" "lb" {
     resource_group_name             = azurerm_lb.lb.0.resource_group_name
     loadbalancer_id                 = azurerm_lb.lb.0.id
     name                            = "backendpool"
-
-    depends_on    = ["null_resource.dependency_getter"]
 }
 
 resource "azurerm_lb_rule" "https" {
