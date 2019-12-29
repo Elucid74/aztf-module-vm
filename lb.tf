@@ -3,7 +3,7 @@ resource "azurerm_lb" "lb" {
   count                 = var.load_balancer_param == null ? 0 : 1
   name		              = "${local.vm_name}-lb"
   location              = var.location
-  resource_group_name   = var.rg
+	resource_group_name  	= var.resource_group_name
 
   sku = var.load_balancer_param.sku
     
