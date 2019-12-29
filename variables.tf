@@ -111,8 +111,23 @@ variable "enable_dependency_agent" {
   default = false
 }
 
-variable "lb_backend_address_pool_id" {
-  description = "load balancer backend address pool id to associate with" 
-  default = null
+variable "load_balancer_param" {
+  description = "load balancer parameters"
+  type = list(object({
+    sku             = string
+    probe_protocol  = string
+    probe_port      = number
+    probe_interval  = number
+    probe_num       = number
+  }))
+  default = [
+    {
+      sku             = "basic"
+      probe_protocol  = "Tcp"
+      probe_port      = 22
+      probe_interval  = 5
+      probe_num       = 2
+    }
+  ]
 }
 

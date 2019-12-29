@@ -32,7 +32,9 @@ resource "azurerm_network_interface" "nic" {
 			name = "ipconfig0"
       subnet_id = var.subnet_id
 	    private_ip_address_allocation     = var.subnet_ip_offset == null ? "dynamic" : "static"
-			private_ip_address                = var.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, var.subnet_ip_offset + count.index)
+    
+      # if subnet_ip_offset is not set, use dynamic ip address. If load balancer is used, reserve the first ip to load balancer and assign the next ip address(es) to vm(s)
+			private_ip_address                = var.subnet_ip_offset == null ? null : var.load_balancer_param == null? cidrhost(var.subnet_prefix, var.subnet_ip_offset + count.index) : cidrhost(var.subnet_prefix, var.subnet_ip_offset + 1 + count.index)
 			public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
 	}
 }
@@ -104,13 +106,11 @@ resource "azurerm_virtual_machine" "vm" {
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "association" {
-  #count = var.vm_num
-  count = var.lb_backend_address_pool_id == null ? 0 : var.vm_num
+  count = var.load_balancer_param == null ? 0 : var.vm_num
 
   network_interface_id    = element(azurerm_network_interface.nic.*.id, count.index)
   ip_configuration_name = "ipconfig0"
-  backend_address_pool_id = var.lb_backend_address_pool_id
-
+  backend_address_pool_id = azurerm_lb_backend_address_pool.lb.0.id
 }
 
 
