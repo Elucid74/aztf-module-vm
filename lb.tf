@@ -16,63 +16,71 @@ resource "azurerm_lb" "lb" {
 }
 
 resource "azurerm_lb_probe" "probe" {
-    resource_group_name       = azurerm_lb.lb.0.resource_group_name
-    loadbalancer_id           = azurerm_lb.lb.0.id
-    name                      = "${azurerm_lb.lb.0.name}-probe"
-    protocol                  = var.load_balancer_param.probe_protocol
-    port                      = var.load_balancer_param.probe_port
+  count                 = var.load_balancer_param == null ? 0 : 1
 
-    interval_in_seconds       = var.load_balancer_param.probe_interval
-    number_of_probes          = var.load_balancer_param.probe_num
+  resource_group_name   = azurerm_lb.lb.0.resource_group_name
+  loadbalancer_id       = azurerm_lb.lb.0.id
+  name                  = "${azurerm_lb.lb.0.name}-probe"
+  protocol              = var.load_balancer_param.probe_protocol
+  port                  = var.load_balancer_param.probe_port
+
+  interval_in_seconds   = var.load_balancer_param.probe_interval
+  number_of_probes      = var.load_balancer_param.probe_num
 }
 
 resource "azurerm_lb_backend_address_pool" "lb" {
-    resource_group_name             = azurerm_lb.lb.0.resource_group_name
-    loadbalancer_id                 = azurerm_lb.lb.0.id
-    name                            = "backendpool"
+  count                 = var.load_balancer_param == null ? 0 : 1
+
+  resource_group_name   = azurerm_lb.lb.0.resource_group_name
+  loadbalancer_id       = azurerm_lb.lb.0.id
+  name                  = "backendpool"
 }
 
 resource "azurerm_lb_rule" "https" {
-    resource_group_name             = azurerm_lb.lb.0.resource_group_name
-    loadbalancer_id                 = azurerm_lb.lb.0.id
+  count                           = var.load_balancer_param == null ? 0 : 1
 
-	  name		                        = "https"
+  resource_group_name             = azurerm_lb.lb.0.resource_group_name
+  loadbalancer_id                 = azurerm_lb.lb.0.id
+
+	name		                        = "https"
     
-    protocol                        = "Tcp"
-    frontend_port                   = 443
-    backend_port                    = 443
+  protocol                        = "Tcp"
+  frontend_port                   = 443
+  backend_port                    = 443
 
-    frontend_ip_configuration_name  = "lb-frontend-ip"
+  frontend_ip_configuration_name  = "lb-frontend-ip"
     
-	  backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
-    probe_id                        = azurerm_lb_probe.probe.0.id
-    depends_on                      = ["azurerm_lb_probe.probe"]
+	backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
+  probe_id                        = azurerm_lb_probe.probe.0.id
+  depends_on                      = ["azurerm_lb_probe.probe"]
 
-    enable_floating_ip              = true
-	  idle_timeout_in_minutes         = 4
-	  load_distribution               = "Default"
-	  disable_outbound_snat           = false
+  enable_floating_ip              = true
+	idle_timeout_in_minutes         = 4
+	load_distribution               = "Default"
+	disable_outbound_snat           = false
 }
 
 resource "azurerm_lb_rule" "http" {
-    resource_group_name             = azurerm_lb.lb.0.resource_group_name
-    loadbalancer_id                 = azurerm_lb.lb.0.id
+  count                           = var.load_balancer_param == null ? 0 : 1
+  
+  resource_group_name             = azurerm_lb.lb.0.resource_group_name
+  loadbalancer_id                 = azurerm_lb.lb.0.id
 
-	  name		                        = "http"
+	name		                        = "http"
  
-    protocol                        = "Tcp"
-    frontend_port                   = 80
-    backend_port                    = 80
+  protocol                        = "Tcp"
+  frontend_port                   = 80
+  backend_port                    = 80
     
-    frontend_ip_configuration_name  = "lb-frontend-ip"
+  frontend_ip_configuration_name  = "lb-frontend-ip"
     
-    backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
-    probe_id                        = azurerm_lb_probe.probe.0.id
-    depends_on                      = ["azurerm_lb_probe.probe"]
+  backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
+  probe_id                        = azurerm_lb_probe.probe.0.id
+  depends_on                      = ["azurerm_lb_probe.probe"]
 
-    enable_floating_ip              = true
-	  idle_timeout_in_minutes         = 4
-	  load_distribution               = "Default"
-	  disable_outbound_snat           = false
+  enable_floating_ip              = true
+	idle_timeout_in_minutes         = 4
+	load_distribution               = "Default"
+	disable_outbound_snat           = false
 }
 
