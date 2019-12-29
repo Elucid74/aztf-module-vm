@@ -48,6 +48,9 @@ resource "azurerm_virtual_machine" "vm" {
   resource_group_name 	                = var.resource_group_name
 	vm_size               	              = var.vm_size
 
+  delete_os_disk_on_termination = true
+  delete_data_disks_on_termination = true
+
 	availability_set_id                   = azurerm_availability_set.avset.id
 	#availability_set_id                   = var.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
 /*
