@@ -78,7 +78,7 @@ resource "azurerm_lb_rule" "http" {
   probe_id                        = azurerm_lb_probe.probe.0.id
   depends_on                      = ["azurerm_lb_probe.probe"]
 
-  enable_floating_ip              = true
+  enable_floating_ip              = false
 	idle_timeout_in_minutes         = 4
 	load_distribution               = "Default"
 	disable_outbound_snat           = false
