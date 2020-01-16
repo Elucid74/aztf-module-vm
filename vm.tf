@@ -62,6 +62,7 @@ resource "azurerm_virtual_machine" "vm" {
 	}
 */
 	storage_image_reference {
+		id                    = var.image_id
 		publisher             = var.vm_publisher
 		offer                 = var.vm_offer
 		sku                   = var.vm_sku

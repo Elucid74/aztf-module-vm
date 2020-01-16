@@ -15,6 +15,11 @@ variable "vm_size" {
   description = "VM size"
 }
 
+variable "image_id" {
+  description = "If specified, VM is created from the image ID"        
+	default = null
+}
+
 variable "vm_publisher" {
 		default = "MicrosoftWindowsServer"
 }
