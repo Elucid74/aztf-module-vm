@@ -52,7 +52,7 @@ resource "azurerm_lb_rule" "https" {
     
 	backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
   probe_id                        = azurerm_lb_probe.probe.0.id
-  depends_on                      = ["azurerm_lb_probe.probe"]
+  depends_on                      = [azurerm_lb_probe.probe]
 
   enable_floating_ip              = false # must be false when used for internal load balancing
 	idle_timeout_in_minutes         = 4
