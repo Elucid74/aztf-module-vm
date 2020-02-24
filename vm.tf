@@ -8,7 +8,7 @@ locals {
 
 
 resource "azurerm_availability_set" "avset" {
-#	count                         = var.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
+	count                         = var.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
 
 	name                  	      = "${local.vm_name}-avset"
 	location              	      = var.location
@@ -51,8 +51,7 @@ resource "azurerm_virtual_machine" "vm" {
   delete_os_disk_on_termination = true
   delete_data_disks_on_termination = true
 
-	availability_set_id                   = azurerm_availability_set.avset.id
-	#availability_set_id                   = var.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
+	availability_set_id                   = var.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
 /*
 	storage_image_reference {
 		publisher             = "MicrosoftWindowsServer"
