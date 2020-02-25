@@ -76,7 +76,7 @@ resource "azurerm_virtual_machine" "vm" {
 	}
 
 	os_profile {
-	  computer_name         = var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
+	  computer_name         = var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
     admin_username        = var.admin_username
     admin_password        = var.admin_password
     custom_data           = var.custom_data == null ? null : filebase64(var.custom_data)
