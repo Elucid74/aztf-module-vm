@@ -3,7 +3,7 @@
 data "azurerm_subscription" "current" {}
 
 locals {
-  vm_name = "${var.prefix}-${var.vm_name}"
+  vm_name = var.prefix == null ? var.vm_name : ${var.prefix}-${var.vm_name}
 }
 
 
@@ -24,7 +24,7 @@ resource "azurerm_availability_set" "avset" {
 resource "azurerm_network_interface" "nic" {
 	count 					                      = var.vm_num
 
-	name           			                  = format("%s-%02d-nic", local.vm_name, count.index + 1)
+	name           			                  = format("%s%03d-nic", local.vm_name, count.index + 1)
 	location            	                = var.location
 	resource_group_name  	                = var.resource_group_name
 	
@@ -42,7 +42,7 @@ resource "azurerm_network_interface" "nic" {
 resource "azurerm_virtual_machine" "vm" {
 	count					                        = var.vm_num
 	
-	name           			                  = var.vm_num == 1 ? local.vm_name: format("%s-%02d", local.vm_name, count.index + 1) 
+	name           			                  = var.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
 
 	location        	   	                = var.location
   resource_group_name 	                = var.resource_group_name
@@ -69,14 +69,14 @@ resource "azurerm_virtual_machine" "vm" {
 	}
 
 	storage_os_disk {
-		name      			      = format("%s-%02d-osdisk", local.vm_name, count.index + 1)
+	  name           			  = var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
 		caching       		    = "ReadWrite"
 		create_option 		    = "FromImage"
 		managed_disk_type 	  = "Premium_LRS"
 	}
 
 	os_profile {
-		computer_name 		    = format("%s-%02d", local.vm_name, count.index + 1)
+	  computer_name         = var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
     admin_username        = var.admin_username
     admin_password        = var.admin_password
     custom_data           = var.custom_data == null ? null : filebase64(var.custom_data)

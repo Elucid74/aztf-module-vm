@@ -1,6 +1,12 @@
 
 variable "prefix" {
   description = "Prefix for the workspace"
+  default = null
+}
+
+variable "postfix" {
+  description = "Prefix for the workspace"
+  default = null
 }
 
 variable "vm_num" {
@@ -125,7 +131,9 @@ variable "load_balancer_param" {
     probe_interval  = number
     probe_num       = number
   })
+
   default = null
+  
   /* example
   default = {
       sku             = "basic"

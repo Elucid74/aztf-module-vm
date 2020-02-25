@@ -29,3 +29,18 @@ module "service1" {
   admin_password                    = local.admin_password
 }
 ```
+
+## VM Naming convention
+
+1) No prefix is given
+ 1.1) no postfix
+  {name}%03d
+ 1.2) postfix is given
+  {name}%03d{postfix}
+2) prefix is given
+ 1.1) no postfix
+  {prefix}-{name}%03d
+ 1.2) postfix is given
+  {prefix}-{name}%03d{postfix}
+
+
