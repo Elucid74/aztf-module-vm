@@ -3,7 +3,7 @@
 data "azurerm_subscription" "current" {}
 
 locals {
-  vm_name = var.prefix == null ? var.vm_name : ${var.prefix}-${var.vm_name}
+  vm_name = var.prefix == null ? var.vm_name : "${var.prefix}-${var.vm_name}"
 }
 
 
