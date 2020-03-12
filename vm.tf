@@ -149,7 +149,7 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 	protected_settings = <<SETTINGS
 	{
 		"storageAccountName": "${var.diag_storage_account_name}",
-		"storageAccountKey" : "${var.diag_storage_account_access_key}"
+		"storageAccountKey" : "${var.diag_storage_account_access_key}",
 		"storageAccountEndpoint": "${var.diag_storage_account_endpoint}",
 	}
 	SETTINGS
