@@ -150,6 +150,7 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 	{
 		"storageAccountName": "${var.diag_storage_account_name}",
 		"storageAccountKey" : "${var.diag_storage_account_access_key}"
+		"storageAccountEndpoint": "${var.diag_storage_account_endpoint}",
 	}
 	SETTINGS
 }

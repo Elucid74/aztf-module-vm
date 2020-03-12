@@ -102,6 +102,11 @@ variable "diag_storage_account_access_key"  {
   default = null      
 }
 
+variable "diag_storage_account_endpoint"  {
+  description = "storage account access key for diagnostics log"
+  default = null      
+}
+
 variable "log_analytics_workspace_id"  {
   description = "log analytics workspace ID for diagnostics log"
   default = null      
