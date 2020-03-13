@@ -124,6 +124,7 @@ locals {
 	wadcfgxstart          = "${local.wadlogs}${local.wadperfcounters1}${local.wadperfcounters2}<Metrics resourceId=\""
 	wadmetricsresourceid  = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Compute/virtualMachines/"
 	wadcfgxend            = file("${path.module}/wadcfgxend.xml.tpl")
+  storageAccountName    = element(split("/", var.diag_storage_account_name), 8)
 }
 
 resource "azurerm_virtual_machine_extension" "diagnostics" {
@@ -143,12 +144,12 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 	settings = <<SETTINGS
 	{
 		"xmlCfg"            : "${base64encode("${local.wadcfgxstart}${local.wadmetricsresourceid}${element(azurerm_virtual_machine.vm.*.name, count.index)}${local.wadcfgxend}")}",
-		"storageAccount"    : "${var.diag_storage_account_name}"
+    "storageAccount"    : "${local.storageAccountName}"
 	}
 	SETTINGS
 	protected_settings = <<SETTINGS
 	{
-		"storageAccountName": "${var.diag_storage_account_name}",
+    "storageAccountName": "${local.storageAccountName}",
 		"storageAccountKey" : "${var.diag_storage_account_access_key}",
 		"storageAccountEndpoint" : "${var.diag_storage_account_endpoint}"
 	}
