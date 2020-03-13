@@ -124,7 +124,7 @@ locals {
 	wadcfgxstart          = "${local.wadlogs}${local.wadperfcounters1}${local.wadperfcounters2}<Metrics resourceId=\""
 	wadmetricsresourceid  = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Compute/virtualMachines/"
 	wadcfgxend            = file("${path.module}/wadcfgxend.xml.tpl")
-  storageAccountName    = element(split("/", var.diag_storage_account_name), 8)
+  storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 }
 
 resource "azurerm_virtual_machine_extension" "diagnostics" {
