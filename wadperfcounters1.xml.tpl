@@ -1,4 +1,4 @@
-<PerformanceCounters scheduledTransferPeriod="PT1M">
+<PerformanceCounters scheduledTransferPeriod="PT1M", sinks="AzMonSink">
 <PerformanceCounterConfiguration counterSpecifier="\Processor(_Total)\% Processor Time" sampleRate="PT15S" unit="Percent">
 <annotation displayName="CPU utilization" locale="en-us"/></PerformanceCounterConfiguration>
 <PerformanceCounterConfiguration counterSpecifier="\Memory\% Committed Bytes In Use" sampleRate="PT15S" unit="Percent">

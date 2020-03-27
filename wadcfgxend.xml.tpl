@@ -1,1 +1,1 @@
-"><MetricAggregation scheduledTransferPeriod="PT1H"/><MetricAggregation scheduledTransferPeriod="PT1M"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>
+"><MetricAggregation scheduledTransferPeriod="PT1H"/><MetricAggregation scheduledTransferPeriod="PT1M"/></Metrics></DiagnosticMonitorConfiguration><SinksConfig><Sink name="AzMonSink"><AzureMonitor></AzureMonitor></Sink></SinksConfig></WadCfg>
