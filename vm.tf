@@ -75,6 +75,10 @@ resource "azurerm_virtual_machine" "vm" {
 		managed_disk_type 	  = "Premium_LRS"
 	}
 
+  identity {
+    type = SystemAssigned 
+  }
+
 	os_profile {
 	  computer_name         = var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
     admin_username        = var.admin_username
@@ -127,6 +131,7 @@ locals {
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 }
 
+# Refer https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostics-extension-schema-windows
 resource "azurerm_virtual_machine_extension" "diagnostics" {
 	count 						            = var.diag_storage_account_name == null ? 0 : var.vm_num
 	
