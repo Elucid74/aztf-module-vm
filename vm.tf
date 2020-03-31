@@ -125,7 +125,7 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 
 	settings = <<SETTINGS
 	{
-		"xmlCfg"            :  "${base64encode(templatefile("wadcfgxml.tmpl", { resource_id = element(azurerm_virtual_machine.vm.*.id, count.index), instrumentation_key = var.application_insights_key }))}",
+		"xmlCfg"            :  "${base64encode(templatefile("${path.module}/wadcfgxml.tmpl", { resource_id = element(azurerm_virtual_machine.vm.*.id, count.index), instrumentation_key = var.application_insights_key }))}",
     "storageAccount"    : "${local.storageAccountName}"
 	}
 	SETTINGS
