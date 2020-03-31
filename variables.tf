@@ -127,6 +127,11 @@ variable "enable_dependency_agent" {
   default = false
 }
 
+variable "application_insights_key" {
+  description = "application insights instrumentation key"
+  default = null
+}
+
 variable "load_balancer_param" {
   description = "load balancer parameters"
   type = object({

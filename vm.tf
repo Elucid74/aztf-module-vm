@@ -128,8 +128,12 @@ locals {
 	wadcfgxstart          = "${local.wadlogs}${local.wadperfcounters1}${local.wadperfcounters2}<Metrics resourceId=\""
 	wadmetricsresourceid  = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Compute/virtualMachines/"
 	wadcfgxend            = file("${path.module}/wadcfgxend.xml.tpl")
+	xmlcfg                = base64encode("${local.wadcfgxstart}${local.wadmetricsresourceid}${element(azurerm_virtual_machine.vm.*.name, count.index)}${local.wadcfgxend}")
+  
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 }
+
+#"xmlCfg"            : "${base64encode("${local.wadcfgxstart}${local.wadmetricsresourceid}${element(azurerm_virtual_machine.vm.*.name, count.index)}${local.wadcfgxend}")}",
 
 # Refer https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostics-extension-schema-windows
 resource "azurerm_virtual_machine_extension" "diagnostics" {
@@ -148,8 +152,8 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 
 	settings = <<SETTINGS
 	{
-		"xmlCfg"            : "${base64encode("${local.wadcfgxstart}${local.wadmetricsresourceid}${element(azurerm_virtual_machine.vm.*.name, count.index)}${local.wadcfgxend}")}",
-    "storageAccount"    : "${local.storageAccountName}"
+		"xmlCfg"            : local.xmlcfg
+    "storageAccount"    : local.storageAccountName
 	}
 	SETTINGS
 	protected_settings = <<SETTINGS
