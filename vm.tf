@@ -144,9 +144,10 @@ resource "azurerm_virtual_machine_extension" "monioring" {
 	count 						            = var.log_analytics_workspace_id == null ? 0 : var.vm_num
 	
 	name 						              = "OMSExtension" 
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 
 	publisher 					          = "Microsoft.EnterpriseCloud.Monitoring"
 	type 						              = "MicrosoftMonitoringAgent"
@@ -169,9 +170,10 @@ resource "azurerm_virtual_machine_extension" "network_watcher" {
 	count 						            = var.enable_network_watcher_extension == true ? var.vm_num : 0
 	
 	name 						              = "Microsoft.Azure.NetworkWatcher" 
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Azure.NetworkWatcher"
 	type 						              = "NetworkWatcherAgentWindows"
@@ -183,9 +185,10 @@ resource "azurerm_virtual_machine_extension" "dependency_agent" {
 	count 						            = var.enable_dependency_agent == true ? var.vm_num : 0
 	
 	name 						              = "DependencyAgentWindows" 
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Azure.Monitoring.DependencyAgent"
 	type 						              = "DependencyAgentWindows"
@@ -198,9 +201,10 @@ resource "azurerm_virtual_machine_extension" "iis" {
 	count					                = var.custom_script_path == "" ? 0 : var.vm_num
 	
 	name 						              = "CustomScriptExtension"
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Compute"
 	type 						              = "CustomScriptExtension"
