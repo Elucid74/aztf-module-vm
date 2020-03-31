@@ -1,11 +1,7 @@
-
-
-data "azurerm_subscription" "current" {}
-
 locals {
-  vm_name = var.prefix == null ? var.vm_name : "${var.prefix}-${var.vm_name}"
+  vm_name 							= var.prefix == null ? var.vm_name : "${var.prefix}-${var.vm_name}"
+  storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 }
-
 
 resource "azurerm_availability_set" "avset" {
 	count                         = var.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
@@ -14,12 +10,11 @@ resource "azurerm_availability_set" "avset" {
 	location              	      = var.location
 	resource_group_name  	        = var.resource_group_name
 	
-  platform_update_domain_count  = 5 // Korea regions support up to 2 fault domains
-	platform_fault_domain_count   = 2 // Korea regions support up to 2 fault domains
+  platform_update_domain_count  = 5 # Korea regions support up to 2 fault domains
+	platform_fault_domain_count   = 2 # Korea regions support up to 2 fault domains
 
 	managed                       = true
 }
-
 
 resource "azurerm_network_interface" "nic" {
 	count 					                      = var.vm_num
@@ -29,8 +24,8 @@ resource "azurerm_network_interface" "nic" {
 	resource_group_name  	                = var.resource_group_name
 	
 	ip_configuration {
-			name = "ipconfig0"
-      subnet_id = var.subnet_id
+			name 															= "ipconfig0"
+      subnet_id 												= var.subnet_id
 	    private_ip_address_allocation     = var.subnet_ip_offset == null ? "dynamic" : "static"
     
       # if subnet_ip_offset is not set, use dynamic ip address. If load balancer is used, reserve the first ip to load balancer and assign the next ip address(es) to vm(s)
@@ -48,18 +43,11 @@ resource "azurerm_virtual_machine" "vm" {
   resource_group_name 	                = var.resource_group_name
 	vm_size               	              = var.vm_size
 
-  delete_os_disk_on_termination = true
-  delete_data_disks_on_termination = true
+  delete_os_disk_on_termination 				= true
+  delete_data_disks_on_termination 			= true
 
 	availability_set_id                   = var.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
-/*
-	storage_image_reference {
-		publisher             = "MicrosoftWindowsServer"
-		offer                 = "WindowsServer"
-		sku                   = "2016-Datacenter"
-		version               = "latest"
-	}
-*/
+
 	storage_image_reference {
 		id                    = var.image_id
 		publisher             = var.vm_publisher
@@ -75,7 +63,7 @@ resource "azurerm_virtual_machine" "vm" {
 		managed_disk_type 	  = "Premium_LRS"
 	}
 
-  identity {
+  identity { # added to enable 'Azure Monitor Sink' feature
     type = "SystemAssigned"
   }
 
@@ -115,25 +103,10 @@ resource "azurerm_virtual_machine" "vm" {
 resource "azurerm_network_interface_backend_address_pool_association" "association" {
   count = var.load_balancer_param == null ? 0 : var.vm_num
 
-  network_interface_id    = element(azurerm_network_interface.nic.*.id, count.index)
-  ip_configuration_name = "ipconfig0"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.lb.0.id
+  network_interface_id    	= element(azurerm_network_interface.nic.*.id, count.index)
+  ip_configuration_name 		= "ipconfig0"
+  backend_address_pool_id 	= azurerm_lb_backend_address_pool.lb.0.id
 }
-
-
-locals {
-	wadlogs               = file("${path.module}/wadlogs.xml.tpl")
-	wadperfcounters1      = file("${path.module}/wadperfcounters1.xml.tpl")
-	wadperfcounters2      = file("${path.module}/wadperfcounters2.xml.tpl")
-	wadcfgxstart          = "${local.wadlogs}${local.wadperfcounters1}${local.wadperfcounters2}<Metrics resourceId=\""
-	wadmetricsresourceid  = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Compute/virtualMachines/"
-	wadcfgxend            = file("${path.module}/wadcfgxend.xml.tpl")
-	xmlcfg                = base64encode("${local.wadcfgxstart}${local.wadmetricsresourceid}${element(azurerm_virtual_machine.vm.*.name, count.index)}${local.wadcfgxend}")
-  
-  storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
-}
-
-#"xmlCfg"            : "${base64encode("${local.wadcfgxstart}${local.wadmetricsresourceid}${element(azurerm_virtual_machine.vm.*.name, count.index)}${local.wadcfgxend}")}",
 
 # Refer https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostics-extension-schema-windows
 resource "azurerm_virtual_machine_extension" "diagnostics" {
@@ -152,8 +125,8 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 
 	settings = <<SETTINGS
 	{
-		"xmlCfg"            : local.xmlcfg
-    "storageAccount"    : local.storageAccountName
+		"xmlCfg"            :  "${base64encode(templatefile("wadcfgxml.tmpl", { resource_id = element(azurerm_virtual_machine.vm.*.id, count.index), instrumentation_key = var.application_insights_key }))}",
+    "storageAccount"    : "${local.storageAccountName}"
 	}
 	SETTINGS
 	protected_settings = <<SETTINGS
@@ -189,8 +162,6 @@ resource "azurerm_virtual_machine_extension" "monioring" {
 	}
 	PROTECTED_SETTINGS
 }
-
-
 
 resource "azurerm_virtual_machine_extension" "network_watcher" {
 	count 						            = var.enable_network_watcher_extension == true ? var.vm_num : 0
