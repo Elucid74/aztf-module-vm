@@ -113,9 +113,11 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 	count 						            = var.diag_storage_account_name == null ? 0 : var.vm_num
 	
 	name                          = "Microsoft.Insights.VMDiagnosticsSettings"
-	location              	      = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   	      = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location              	      = var.location
+	#resource_group_name  	        = var.resource_group_name
+
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   	      = element(azurerm_virtual_machine.vm.*.name, count.index)
 
 	publisher            	        = "Microsoft.Azure.Diagnostics"
 	type                 	        = "IaaSDiagnostics"
