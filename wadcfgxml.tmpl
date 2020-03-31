@@ -1,12 +1,12 @@
 <WadCfg>
 	<DiagnosticMonitorConfiguration overallQuotaInMB="4096" xmlns="http://schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration">
 		<DiagnosticInfrastructureLogs scheduledTransferLogLevelFilter="Error" sinks="ApplicationInsights.Errors"/>
-		<Logs  bufferQuotaInMB="1024" scheduledTransferPeriod="PT1M" scheduledTransferLogLevelFilter="Verbose" sinks="ApplicationInsights.AppLogs"/>
-		<WindowsEventLog scheduledTransferPeriod="PT1M">
+		<WindowsEventLog scheduledTransferPeriod="PT1M" sinks="ApplicationInsights.AppLogs">
 			<DataSource name="Application!*[System[(Level = 1 or Level = 2)]]"/>
 			<DataSource name="Security!*[System[(Level = 1 or Level = 2)]]"/>
 			<DataSource name="System!*[System[(Level = 1 or Level = 2)]]"/>
 		</WindowsEventLog>
+    <Logs scheduledTransferPeriod="PT1M" scheduledTransferLogLevelFilter="Verbose" sinks="ApplicationInsights.AppLogs"/> 
 		<PerformanceCounters scheduledTransferPeriod="PT1M" sinks="AzMonSink">
 			<PerformanceCounterConfiguration counterSpecifier="\Processor(_Total)\% Processor Time" sampleRate="PT15S" unit="Percent"><annotation displayName="CPU utilization" locale="en-us"/></PerformanceCounterConfiguration>
 			<PerformanceCounterConfiguration counterSpecifier="\Memory\% Committed Bytes In Use" sampleRate="PT15S" unit="Percent"><annotation displayName="Memory usage" locale="en-us"/></PerformanceCounterConfiguration>
