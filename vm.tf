@@ -140,6 +140,8 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 	SETTINGS
 }
 
+# https://docs.microsoft.com/ko-kr/azure/virtual-machines/extensions/oms-windows 
+# https://docs.microsoft.com/ko-kr/azure/virtual-machines/extensions/oms-linux
 resource "azurerm_virtual_machine_extension" "monioring" {
 	count 						            = var.log_analytics_workspace_id == null ? 0 : var.vm_num
 	
@@ -150,8 +152,8 @@ resource "azurerm_virtual_machine_extension" "monioring" {
 	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 
 	publisher 					          = "Microsoft.EnterpriseCloud.Monitoring"
-	type 						              = "MicrosoftMonitoringAgent"
-	type_handler_version 		      = "1.0"
+	type 						              = var.vm_offer == "WindowsServer" ? "MicrosoftMonitoringAgent" : "OmsAgentForLinux"
+	type_handler_version 		      = var.vm_offer == "WindowsServer" ? "1.0" : "1.7"
 	auto_upgrade_minor_version 	  = true
 
 	settings = <<SETTINGS
