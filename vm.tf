@@ -115,11 +115,18 @@ resource "azurerm_virtual_machine" "vm" {
 resource "azurerm_network_interface_backend_address_pool_association" "association" {
   count = var.load_balancer_param == null ? 0 : var.vm_num
 
-  network_interface_id    = element(azurerm_network_interface.nic.*.id, count.index)
-  ip_configuration_name = "ipconfig0"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.lb.0.id
+  network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
+  ip_configuration_name     = "ipconfig0"
+  backend_address_pool_id   = azurerm_lb_backend_address_pool.lb.0.id
 }
 
+resource "azurerm_network_interface_backend_address_pool_association" "association_outbound" {
+	count                     = var.backend_outbound_address_pool_id == null ? 0 : var.vm_num
+
+	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
+	ip_configuration_name     = "ipconfig0"
+	backend_address_pool_id   = var.backend_outbound_address_pool_id
+}
 
 locals {
 	wadlogs               = file("${path.module}/wadlogs.xml.tpl")
@@ -258,14 +265,6 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
 	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
 	ip_configuration_name     = "ipconfig0"
 	backend_address_pool_id   = var.backend_address_pool_id2
-}
-
-resource "azurerm_network_interface_backend_address_pool_association" "extlb-outbound" {
-	count                     = var.backend_outbound_address_pool_id == null ? 0 : var.vm_num
-
-	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
-	ip_configuration_name     = "ipconfig0"
-	backend_address_pool_id   = var.backend_outbound_address_pool_id
 }
 
 output "vm_map" {

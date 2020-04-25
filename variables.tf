@@ -155,3 +155,8 @@ variable "load_balancer_param" {
   */
 }
 
+variable "backend_outbound_address_pool_id" {
+  description = "Backend Outbound Address Pool ID of external load balancer. This can be used for assign outbound public IP address pool"
+  default = null
+}
+
