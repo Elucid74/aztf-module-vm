@@ -1,11 +1,7 @@
-
-
-data "azurerm_subscription" "current" {}
-
 locals {
-  vm_name = var.prefix == null ? var.vm_name : "${var.prefix}-${var.vm_name}"
+  vm_name 							= var.prefix == null ? var.vm_name : "${var.prefix}-${var.vm_name}"
+  storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 }
-
 
 resource "azurerm_availability_set" "avset" {
 	count                         = var.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
@@ -14,12 +10,11 @@ resource "azurerm_availability_set" "avset" {
 	location              	      = var.location
 	resource_group_name  	        = var.resource_group_name
 	
-  platform_update_domain_count  = 5 // Korea regions support up to 2 fault domains
-	platform_fault_domain_count   = 2 // Korea regions support up to 2 fault domains
+  platform_update_domain_count  = 5 # Korea regions support up to 2 fault domains
+	platform_fault_domain_count   = 2 # Korea regions support up to 2 fault domains
 
 	managed                       = true
 }
-
 
 resource "azurerm_network_interface" "nic" {
 	count 					                      = var.vm_num
@@ -29,8 +24,8 @@ resource "azurerm_network_interface" "nic" {
 	resource_group_name  	                = var.resource_group_name
 	
 	ip_configuration {
-			name = "ipconfig0"
-      subnet_id = var.subnet_id
+			name 															= "ipconfig0"
+      subnet_id 												= var.subnet_id
 	    private_ip_address_allocation     = var.subnet_ip_offset == null ? "dynamic" : "static"
     
       # if subnet_ip_offset is not set, use dynamic ip address. If load balancer is used, reserve the first ip to load balancer and assign the next ip address(es) to vm(s)
@@ -48,18 +43,11 @@ resource "azurerm_virtual_machine" "vm" {
   resource_group_name 	                = var.resource_group_name
 	vm_size               	              = var.vm_size
 
-  delete_os_disk_on_termination = true
-  delete_data_disks_on_termination = true
+  delete_os_disk_on_termination 				= true
+  delete_data_disks_on_termination 			= true
 
 	availability_set_id                   = var.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
-/*
-	storage_image_reference {
-		publisher             = "MicrosoftWindowsServer"
-		offer                 = "WindowsServer"
-		sku                   = "2016-Datacenter"
-		version               = "latest"
-	}
-*/
+
 	storage_image_reference {
 		id                    = var.image_id
 		publisher             = var.vm_publisher
@@ -75,7 +63,7 @@ resource "azurerm_virtual_machine" "vm" {
 		managed_disk_type 	  = "Premium_LRS"
 	}
 
-  identity {
+  identity { # added to enable 'Azure Monitor Sink' feature
     type = "SystemAssigned"
   }
 
@@ -147,9 +135,11 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 	count 						            = var.diag_storage_account_name == null ? 0 : var.vm_num
 	
 	name                          = "Microsoft.Insights.VMDiagnosticsSettings"
-	location              	      = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   	      = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location              	      = var.location
+	#resource_group_name  	        = var.resource_group_name
+
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   	      = element(azurerm_virtual_machine.vm.*.name, count.index)
 
 	publisher            	        = "Microsoft.Azure.Diagnostics"
 	type                 	        = "IaaSDiagnostics"
@@ -159,8 +149,8 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 
 	settings = <<SETTINGS
 	{
-		"xmlCfg"            : local.xmlcfg
-    "storageAccount"    : local.storageAccountName
+		"xmlCfg"            :  "${base64encode(templatefile("${path.module}/wadcfgxml.tmpl", { resource_id = element(azurerm_virtual_machine.vm.*.id, count.index), instrumentation_key = var.application_insights_key }))}",
+    "storageAccount"    : "${local.storageAccountName}"
 	}
 	SETTINGS
 	protected_settings = <<SETTINGS
@@ -172,17 +162,20 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 	SETTINGS
 }
 
+# https://docs.microsoft.com/ko-kr/azure/virtual-machines/extensions/oms-windows 
+# https://docs.microsoft.com/ko-kr/azure/virtual-machines/extensions/oms-linux
 resource "azurerm_virtual_machine_extension" "monioring" {
 	count 						            = var.log_analytics_workspace_id == null ? 0 : var.vm_num
 	
 	name 						              = "OMSExtension" 
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 
 	publisher 					          = "Microsoft.EnterpriseCloud.Monitoring"
-	type 						              = "MicrosoftMonitoringAgent"
-	type_handler_version 		      = "1.0"
+	type 						              = var.vm_offer == "WindowsServer" ? "MicrosoftMonitoringAgent" : "OmsAgentForLinux"
+	type_handler_version 		      = var.vm_offer == "WindowsServer" ? "1.0" : "1.7"
 	auto_upgrade_minor_version 	  = true
 
 	settings = <<SETTINGS
@@ -197,15 +190,14 @@ resource "azurerm_virtual_machine_extension" "monioring" {
 	PROTECTED_SETTINGS
 }
 
-
-
 resource "azurerm_virtual_machine_extension" "network_watcher" {
 	count 						            = var.enable_network_watcher_extension == true ? var.vm_num : 0
 	
 	name 						              = "Microsoft.Azure.NetworkWatcher" 
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Azure.NetworkWatcher"
 	type 						              = "NetworkWatcherAgentWindows"
@@ -217,9 +209,10 @@ resource "azurerm_virtual_machine_extension" "dependency_agent" {
 	count 						            = var.enable_dependency_agent == true ? var.vm_num : 0
 	
 	name 						              = "DependencyAgentWindows" 
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Azure.Monitoring.DependencyAgent"
 	type 						              = "DependencyAgentWindows"
@@ -232,9 +225,10 @@ resource "azurerm_virtual_machine_extension" "iis" {
 	count					                = var.custom_script_path == "" ? 0 : var.vm_num
 	
 	name 						              = "CustomScriptExtension"
-	location 					            = var.location
-	resource_group_name  	        = var.resource_group_name
-	virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
+	#location 					            = var.location
+	#resource_group_name  	        = var.resource_group_name
+	virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Compute"
 	type 						              = "CustomScriptExtension"
