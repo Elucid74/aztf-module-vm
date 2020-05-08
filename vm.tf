@@ -35,12 +35,6 @@ resource "azurerm_network_interface" "nic" {
 }
 
 resource "azurerm_virtual_machine" "vm" {
-  lifecycle {
-    ignore_changes = [
-      os_profile["computer_name"],
-    ]
-  }
-
 	count					                        = var.vm_num
 	
 	name           			                  = var.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
