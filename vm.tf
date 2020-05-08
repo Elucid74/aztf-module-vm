@@ -36,7 +36,9 @@ resource "azurerm_network_interface" "nic" {
 
 resource "azurerm_virtual_machine" "vm" {
   lifecycle {
-    ignore_changes = [os_profile.computer_name]
+    ignore_changes = [
+      os_profile["computer_name"],
+    ]
   }
 
 	count					                        = var.vm_num
