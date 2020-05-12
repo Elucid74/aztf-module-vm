@@ -25,11 +25,12 @@
 			<PerformanceCounterConfiguration counterSpecifier="\Web Service(Default Web Site)\Bytes Sent/sec" sampleRate="PT15S" unit="CountPerSecond"><annotation displayName="Web Service(Default Web Site) Bytes Sent per sec" locale="en-us"/></PerformanceCounterConfiguration>
 			<PerformanceCounterConfiguration counterSpecifier="\Web Service(Default Web Site)\Current Connections" sampleRate="PT15S" unit="Count"><annotation displayName="Web Service(Default Web Site) Current Connections" locale="en-us"/></PerformanceCounterConfiguration>
 			<PerformanceCounterConfiguration counterSpecifier="\Web Service(Default Web Site)\Total Method Requests/sec" sampleRate="PT15S" unit="CountPerSecond"><annotation displayName="Web Service(Default Web Site) Total Method Requests/sec" locale="en-us"/></PerformanceCounterConfiguration>
-			<PerformanceCounterConfiguration counterSpecifier="\PhysicalDisk(_Total)\% Disk Read Time" sampleRate="PT15S" unit="Percent"><annotation displayName="Disk active read time" locale="en-us"/></PerformanceCounterConfiguration></PerformanceCounters>
-			<PerformanceCounterConfiguration counterSpecifier="\HTTP Service Url Groups(FE00000040000001)\CurrentConnections" sampleRate="PT15S" unit="Percent"><annotation displayName="HTTP Service Url Groups(FE00000040000001)" locale="en-us"/></PerformanceCounterConfiguration></PerformanceCounters>
-			<PerformanceCounterConfiguration counterSpecifier="\WFPv4\Active Outbound Connections" sampleRate="PT15S" unit="Percent"><annotation displayName="WFPv4 Active Outbound Connections" locale="en-us"/></PerformanceCounterConfiguration></PerformanceCounters>
-			<PerformanceCounterConfiguration counterSpecifier="\WFPv4\Active Inbound Connections" sampleRate="PT15S" unit="Percent"><annotation displayName="WFPv4 Active Inbound Connections" locale="en-us"/></PerformanceCounterConfiguration></PerformanceCounters>
-			<PerformanceCounterConfiguration counterSpecifier="\Event Tracing for Windows Session(TracingGuidsApmConnector)\Number of Real-Time Consumers" sampleRate="PT15S" unit="Percent"><annotation displayName="Event Tracing for Windows Session. Number of Real-Time customers" locale="en-us"/></PerformanceCounterConfiguration></PerformanceCounters>
+			<PerformanceCounterConfiguration counterSpecifier="\PhysicalDisk(_Total)\% Disk Read Time" sampleRate="PT15S" unit="Percent"><annotation displayName="Disk active read time" locale="en-us"/></PerformanceCounterConfiguration>
+			<PerformanceCounterConfiguration counterSpecifier="\WFPv4\Active Outbound Connections" sampleRate="PT15S" unit="Count"><annotation displayName="WFPv4 Active Outbound Connections" locale="en-us"/></PerformanceCounterConfiguration>
+			<PerformanceCounterConfiguration counterSpecifier="\WFPv4\Active Inbound Connections" sampleRate="PT15S" unit="Count"><annotation displayName="WFPv4 Active Inbound Connections" locale="en-us"/></PerformanceCounterConfiguration>
+			<PerformanceCounterConfiguration counterSpecifier="\Event Tracing for Windows Session(TracingGuidsApmConnector)\Number of Real-Time Consumers" sampleRate="PT15S" unit="Count"><annotation displayName="Event Tracing for Windows Session. Number of Real-Time customers" locale="en-us"/></PerformanceCounterConfiguration>
+			<PerformanceCounterConfiguration counterSpecifier="\HTTP Service Url Groups(FE00000040000001)\CurrentConnections" sampleRate="PT15S" unit="Count"><annotation displayName="HTTP Service Url Groups(FE00000040000001)" locale="en-us"/></PerformanceCounterConfiguration>
+		</PerformanceCounters>
 		<Metrics resourceId="${resource_id}">
 			<MetricAggregation scheduledTransferPeriod="PT1H"/>
 			<MetricAggregation scheduledTransferPeriod="PT1M"/>
@@ -39,12 +40,5 @@
 		<Sink name="AzMonSink">
 			<AzureMonitor></AzureMonitor>
 		</Sink>
-		<Sink name="ApplicationInsights">   
-			<ApplicationInsights>${instrumentation_key}</ApplicationInsights>   
-			<Channels>   
-				<Channel logLevel="Error" name="Errors"  />   
-				<Channel logLevel="Verbose" name="AppLogs"  />   
-			</Channels>   
-		</Sink>   
 	</SinksConfig>
 </WadCfg>
