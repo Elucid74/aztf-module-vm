@@ -34,7 +34,7 @@ resource "azurerm_network_interface" "nic" {
 			public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
 	}
   
-	enable_ip_forwarding = "true" 
+  enable_accelerated_networking       	= "true"
 }
 
 resource "azurerm_virtual_machine" "vm" {
