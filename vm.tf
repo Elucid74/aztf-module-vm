@@ -33,6 +33,8 @@ resource "azurerm_network_interface" "nic" {
 			private_ip_address                = var.subnet_ip_offset == null ? null : var.load_balancer_param == null? cidrhost(var.subnet_prefix, var.subnet_ip_offset + count.index) : cidrhost(var.subnet_prefix, var.subnet_ip_offset + 1 + count.index)
 			public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
 	}
+  
+	enable_ip_forwarding = "true" 
 }
 
 resource "azurerm_virtual_machine" "vm" {
