@@ -1,10 +1,18 @@
 locals {
-  vm_name 							= var.prefix == null ? var.vm_name : "${var.prefix}-${var.vm_name}"
+  vm_name 							= var.prefix == null ? var.instances.name : "${var.prefix}-${var.instances.name}"
+	vm_size								= var.instances.vm_size
+	vm_num								= var.instances.vm_num
+	subnet_ip_offset			= var.instances.subnet_ip_offset
+	vm_publisher					= var.instances.vm_publisher
+	vm_offer							= var.instances.vm_offer
+	vm_sku								= var.instances.vm_sku
+	vm_version						= var.instances.vm_version
+
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 }
 
 resource "azurerm_availability_set" "avset" {
-	count                         = var.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
+	count                         = local.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
 
 	name                  	      = "${local.vm_name}-avset"
 	location              	      = var.location
@@ -17,9 +25,9 @@ resource "azurerm_availability_set" "avset" {
 }
 
 resource "azurerm_network_interface" "nic" {
-	count 					                      = var.vm_num
+	count 					                      = local.vm_num
 
-	name         													= var.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d%s-nic", local.vm_name, count.index + 1)
+	name         													= local.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d%s-nic", local.vm_name, count.index + 1)
 	#name           			                  = format("%s%03d-nic", local.vm_name, count.index + 1)
 	location            	                = var.location
 	resource_group_name  	                = var.resource_group_name
@@ -27,10 +35,10 @@ resource "azurerm_network_interface" "nic" {
 	ip_configuration {
 			name 															= "ipconfig0"
       subnet_id 												= var.subnet_id
-	    private_ip_address_allocation     = var.subnet_ip_offset == null ? "dynamic" : "static"
+	    private_ip_address_allocation     = local.subnet_ip_offset == null ? "dynamic" : "static"
     
       # if subnet_ip_offset is not set, use dynamic ip address. If load balancer is used, reserve the first ip to load balancer and assign the next ip address(es) to vm(s)
-			private_ip_address                = var.subnet_ip_offset == null ? null : var.load_balancer_param == null? cidrhost(var.subnet_prefix, var.subnet_ip_offset + count.index) : cidrhost(var.subnet_prefix, var.subnet_ip_offset + 1 + count.index)
+			private_ip_address                = local.subnet_ip_offset == null ? null : var.load_balancer_param == null? cidrhost(var.subnet_prefix, local.subnet_ip_offset + count.index) : cidrhost(var.subnet_prefix, local.subnet_ip_offset + 1 + count.index)
 			public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
 	}
   
@@ -38,29 +46,29 @@ resource "azurerm_network_interface" "nic" {
 }
 
 resource "azurerm_virtual_machine" "vm" {
-	count					                        = var.vm_num
+	count					                        = local.vm_num
 	
-	name           			                  = var.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
+	name           			                  = local.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
 
 	location        	   	                = var.location
   resource_group_name 	                = var.resource_group_name
-	vm_size               	              = var.vm_size
+	vm_size               	              = local.vm_size
 
   delete_os_disk_on_termination 				= true
   delete_data_disks_on_termination 			= true
 
-	availability_set_id                   = var.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
+	availability_set_id                   = local.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
 
 	storage_image_reference {
 		id                    = var.image_id
-		publisher             = var.vm_publisher
-		offer                 = var.vm_offer
-		sku                   = var.vm_sku
-		version               = var.vm_version
+		publisher             = local.vm_publisher
+		offer                 = local.vm_offer
+		sku                   = local.vm_sku
+		version               = local.vm_version
 	}
 
 	storage_os_disk {
-		name         = var.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
+		name         = local.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
 	  #name           			  = var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
 		caching       		    = "ReadWrite"
 		create_option 		    = "FromImage"
@@ -72,7 +80,7 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
 	os_profile {
-		computer_name         = var.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
+		computer_name         = local.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
 	  #computer_name         = var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
     admin_username        = var.admin_username
     admin_password        = var.admin_password
@@ -106,7 +114,7 @@ resource "azurerm_virtual_machine" "vm" {
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "association" {
-  count = var.load_balancer_param == null ? 0 : var.vm_num
+  count = var.load_balancer_param == null ? 0 : local.vm_num
 
   network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
   ip_configuration_name     = "ipconfig0"
@@ -114,7 +122,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "associati
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "association_outbound" {
-	count                     = var.backend_outbound_address_pool_id == null ? 0 : var.vm_num
+	count                     = var.backend_outbound_address_pool_id == null ? 0 : local.vm_num
 
 	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
 	ip_configuration_name     = "ipconfig0"
@@ -123,7 +131,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "associati
 
 # Refer https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostics-extension-schema-windows
 resource "azurerm_virtual_machine_extension" "diagnostics" {
-	count 						            = var.diag_storage_account_name == null ? 0 : var.vm_num
+	count 						            = var.diag_storage_account_name == null ? 0 : local.vm_num
 	
 	name                          = "Microsoft.Insights.VMDiagnosticsSettings"
 	#location              	      = var.location
@@ -156,7 +164,7 @@ resource "azurerm_virtual_machine_extension" "diagnostics" {
 # https://docs.microsoft.com/ko-kr/azure/virtual-machines/extensions/oms-windows 
 # https://docs.microsoft.com/ko-kr/azure/virtual-machines/extensions/oms-linux
 resource "azurerm_virtual_machine_extension" "monioring" {
-	count 						            = var.log_analytics_workspace_id == null ? 0 : var.vm_num
+	count 						            = var.log_analytics_workspace_id == null ? 0 : local.vm_num
 	
 	name 						              = "OMSExtension" 
 	#location 					            = var.location
@@ -182,7 +190,7 @@ resource "azurerm_virtual_machine_extension" "monioring" {
 }
 
 resource "azurerm_virtual_machine_extension" "network_watcher" {
-	count 						            = var.enable_network_watcher_extension == true ? var.vm_num : 0
+	count 						            = var.enable_network_watcher_extension == true ? local.vm_num : 0
 	
 	name 						              = "Microsoft.Azure.NetworkWatcher" 
 	#location 					            = var.location
@@ -197,7 +205,7 @@ resource "azurerm_virtual_machine_extension" "network_watcher" {
 }
 
 resource "azurerm_virtual_machine_extension" "dependency_agent" {
-	count 						            = var.enable_dependency_agent == true ? var.vm_num : 0
+	count 						            = var.enable_dependency_agent == true ? local.vm_num : 0
 	
 	name 						              = "DependencyAgentWindows" 
 	#location 					            = var.location
@@ -213,7 +221,7 @@ resource "azurerm_virtual_machine_extension" "dependency_agent" {
 
 /*
 resource "azurerm_virtual_machine_extension" "iis" {
-	count					                = var.custom_script_path == "" ? 0 : var.vm_num
+	count					                = var.custom_script_path == "" ? 0 : local.vm_num
 	
 	name 						              = "CustomScriptExtension"
 	#location 					            = var.location
@@ -237,7 +245,7 @@ resource "azurerm_virtual_machine_extension" "iis" {
 }
 
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "association" {
-	count                     = var.backend_address_pool_id == null ? 0 : var.vm_num
+	count                     = var.backend_address_pool_id == null ? 0 : local.vm_num
 	
 	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
 	ip_configuration_name     = "ipconfig0"
@@ -245,7 +253,7 @@ resource "azurerm_network_interface_application_gateway_backend_address_pool_ass
 }
 
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "association2" {
-	count                     = var.backend_address_pool_id2 == null ? 0 : var.vm_num
+	count                     = var.backend_address_pool_id2 == null ? 0 : local.vm_num
 	
 	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
 	ip_configuration_name     = "ipconfig0"

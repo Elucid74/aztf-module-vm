@@ -9,6 +9,26 @@ variable "postfix" {
   default = null
 }
 
+variable "instances" {
+  description = "VM instance configuration parameters"
+
+	/*
+		instances  = {
+  		name          = "svc-a"
+  		vm_num        = 2
+  		vm_size       = "Standard_D4s_v3"
+  		subnet        = "subnet-gmarket-1"
+  		subnet_ip_offset  = 5
+  		vm_publisher      = "Canonical"
+  		vm_offer          = "UbuntuServer"
+  		vm_sku            = "16.04.0-LTS"
+  		vm_version        = "latest"
+		}
+	*/
+
+}
+
+/*
 variable "vm_num" {
   description = "Number of VMs to create"        
 }
@@ -21,9 +41,9 @@ variable "vm_size" {
   description = "VM size"
 }
 
-variable "image_id" {
-  description = "If specified, VM is created from the image ID"        
-	default = null
+variable "subnet_ip_offset"	{
+  description = "IP offset of starting VM IP" 
+  default = null
 }
 
 variable "vm_publisher" {
@@ -40,6 +60,12 @@ variable "vm_sku" {
 
 variable "vm_version" {
 		default = "latest"
+}
+*/
+
+variable "image_id" {
+  description = "If specified, VM is created from the image ID"        
+	default = null
 }
 
 variable "resource_group_name" {
@@ -63,11 +89,6 @@ variable "subnet_prefix" {
   description = "subnet prefix" 
 }
         
-variable "subnet_ip_offset"	{
-  description = "IP offset of starting VM IP" 
-  default = null
-}
-
 variable "public_ip_id" {
   description = "ID of public IP resource. Optional" 
   default = null
