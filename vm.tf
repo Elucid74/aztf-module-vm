@@ -88,14 +88,14 @@ resource "azurerm_virtual_machine" "vm" {
 	}
   
   dynamic "os_profile_windows_config" {
-    for_each = var.vm_offer == "WindowsServer" ? ["WindowsServer"] : []
+    for_each = local.vm_offer == "WindowsServer" ? ["WindowsServer"] : []
     content {
 		  provision_vm_agent    = true
     }
   }
 
   dynamic "os_profile_linux_config" {
-    for_each = var.vm_offer == "UbuntuServer" ? ["UbuntuServer"] : []
+    for_each = local.vm_offer == "UbuntuServer" ? ["UbuntuServer"] : []
     content {
       disable_password_authentication = false
     }
@@ -173,8 +173,8 @@ resource "azurerm_virtual_machine_extension" "monioring" {
 	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 
 	publisher 					          = "Microsoft.EnterpriseCloud.Monitoring"
-	type 						              = var.vm_offer == "WindowsServer" ? "MicrosoftMonitoringAgent" : "OmsAgentForLinux"
-	type_handler_version 		      = var.vm_offer == "WindowsServer" ? "1.0" : "1.7"
+	type 						              = local.vm_offer == "WindowsServer" ? "MicrosoftMonitoringAgent" : "OmsAgentForLinux"
+	type_handler_version 		      = local.vm_offer == "WindowsServer" ? "1.0" : "1.7"
 	auto_upgrade_minor_version 	  = true
 
 	settings = <<SETTINGS
