@@ -131,7 +131,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "associati
 
 # Refer https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostics-extension-schema-windows
 resource "azurerm_virtual_machine_extension" "diagnostics" {
-	count 						            = var.diag_storage_account_name == null ? 0 : local.vm_num
+	count                         = var.diag_storage_account_name == null ? 0 : local.vm_offer == "WindowsServer" ? local.vm_num : 0
 	
 	name                          = "Microsoft.Insights.VMDiagnosticsSettings"
 	#location              	      = var.location
