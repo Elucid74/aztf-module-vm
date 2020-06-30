@@ -27,7 +27,7 @@ resource "azurerm_availability_set" "avset" {
 resource "azurerm_network_interface" "nic" {
 	count 					                      = local.vm_num
 
-	name         													= local.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d%s-nic", local.vm_name, count.index + 1)
+	name         													= local.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d-nic", local.vm_name, count.index + 1)
 	#name           			                  = format("%s%03d-nic", local.vm_name, count.index + 1)
 	location            	                = var.location
 	resource_group_name  	                = var.resource_group_name
