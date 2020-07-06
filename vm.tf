@@ -12,7 +12,7 @@ locals {
 	postfix								= var.instances.postfix
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 
-	enable_accelerated_networking = var.instance.vm_size == "Standard_D2s_v3" ? "false" : "true"
+	enable_accelerated_networking = var.instances.vm_size == "Standard_D2s_v3" ? "false" : "true"
 }
 
 resource "azurerm_availability_set" "avset" {
