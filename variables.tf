@@ -1,7 +1,7 @@
 variable "instances" {
   description = "VM instance configuration parameters"
 
-	type = list(object({
+	type = object({
 		name 							= string
 		vm_num						= number
 		vm_size						= string
@@ -14,23 +14,21 @@ variable "instances" {
 		vm_version				= string
 		prefix						= string
 		postfix						= string
-	}))
+	})
 
-	default = [
-		{
-  		name          		= "myvm"
-  		vm_num        		= 1
-  		vm_size       		= "Standard_D4s_v3"
-			subnet						= "default"
-  		subnet_ip_offset  = 4
-			prefix						= null
-			postfix						= null
-  		vm_publisher      = "Canonical"
-  		vm_offer          = "UbuntuServer"
-  		vm_sku            = "16.04.0-LTS"
-  		vm_version        = "latest"
-		}
-	]
+	default = {
+ 		name          		= "myvm"
+ 		vm_num        		= 1
+ 		vm_size       		= "Standard_D4s_v3"
+		subnet						= "default"
+ 		subnet_ip_offset  = 4
+		prefix						= null
+		postfix						= null
+ 		vm_publisher      = "Canonical"
+ 		vm_offer          = "UbuntuServer"
+ 		vm_sku            = "16.04.0-LTS"
+ 		vm_version        = "latest"
+	}
 }
 
 
