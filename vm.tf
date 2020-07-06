@@ -11,6 +11,8 @@ locals {
 	vm_version						= var.instances.vm_version
 	postfix								= var.instances.postfix
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
+
+	enable_accelerated_networking = var.instance.vm_size == "Standard_D2s_v3" ? "false" : "true"
 }
 
 resource "azurerm_availability_set" "avset" {
@@ -44,7 +46,7 @@ resource "azurerm_network_interface" "nic" {
 			public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
 	}
   
-  enable_accelerated_networking       	= "true"
+  enable_accelerated_networking       	= local.enable_accelerated_networking
 }
 
 resource "azurerm_virtual_machine" "vm" {
