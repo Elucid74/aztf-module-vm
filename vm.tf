@@ -1,5 +1,7 @@
 locals {
-  vm_name 							= var.prefix == null ? var.instances.name : "${var.prefix}-${var.instances.name}"
+	prefix								= var.prefix
+
+  vm_name 							= local.prefix == null ? var.instances.name : "${local.prefix}-${var.instances.name}"
 	vm_size								= var.instances.vm_size
 	vm_num								= var.instances.vm_num
 	subnet_ip_offset			= var.instances.subnet_ip_offset
@@ -7,7 +9,7 @@ locals {
 	vm_offer							= var.instances.vm_offer
 	vm_sku								= var.instances.vm_sku
 	vm_version						= var.instances.vm_version
-
+	postfix								= var.instances.postfix
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 }
 
@@ -48,7 +50,7 @@ resource "azurerm_network_interface" "nic" {
 resource "azurerm_virtual_machine" "vm" {
 	count					                        = local.vm_num
 	
-	name           			                  = local.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
+	name           			                  = local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
 
 	location        	   	                = var.location
   resource_group_name 	                = var.resource_group_name
@@ -68,8 +70,8 @@ resource "azurerm_virtual_machine" "vm" {
 	}
 
 	storage_os_disk {
-		name         = local.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
-	  #name           			  = var.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, var.postfix) 
+		name         = local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, local.postfix) 
+	  #name           			  = local.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, local.postfix) 
 		caching       		    = "ReadWrite"
 		create_option 		    = "FromImage"
 		managed_disk_type 	  = "Premium_LRS"
@@ -80,8 +82,8 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
 	os_profile {
-		computer_name         = local.vm_num == 1 ? local.vm_name: var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
-	  #computer_name         = var.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, var.postfix) 
+		computer_name         = local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
+	  #computer_name         = local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
     admin_username        = var.admin_username
     admin_password        = var.admin_password
     custom_data           = var.custom_data == null ? null : filebase64(var.custom_data)

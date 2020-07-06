@@ -1,4 +1,39 @@
+variable "instances" {
+  description = "VM instance configuration parameters"
 
+	type = list(object({
+		name 							= string
+		vm_num						= number
+		vm_size						= string
+		subnet						= string
+		subnet_ip_offset	= number
+
+		vm_publisher			= string
+		vm_offer					= string
+		vm_sku						= string
+		vm_version				= string
+		prefix						= string
+		postfix						= string
+	}))
+
+	default = [
+		{
+  		name          		= "myvm"
+  		vm_num        		= 1
+  		vm_size       		= "Standard_D4s_v3"
+  		subnet_ip_offset  = 4
+			prefix						= null
+			postfix						= null
+  		vm_publisher      = "Canonical"
+  		vm_offer          = "UbuntuServer"
+  		vm_sku            = "16.04.0-LTS"
+  		vm_version        = "latest"
+		}
+	]
+}
+
+
+/*
 variable "prefix" {
   description = "Prefix for the workspace"
   default = null
@@ -9,26 +44,6 @@ variable "postfix" {
   default = null
 }
 
-variable "instances" {
-  description = "VM instance configuration parameters"
-
-	/*
-		instances  = {
-  		name          = "svc-a"
-  		vm_num        = 2
-  		vm_size       = "Standard_D4s_v3"
-  		subnet        = "subnet-gmarket-1"
-  		subnet_ip_offset  = 5
-  		vm_publisher      = "Canonical"
-  		vm_offer          = "UbuntuServer"
-  		vm_sku            = "16.04.0-LTS"
-  		vm_version        = "latest"
-		}
-	*/
-
-}
-
-/*
 variable "vm_num" {
   description = "Number of VMs to create"        
 }
