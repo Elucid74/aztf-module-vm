@@ -5,7 +5,6 @@ variable "instances" {
 		name 							= string
 		vm_num						= number
 		vm_size						= string
-		subnet						= string
 		subnet_ip_offset	= number
 
 		vm_publisher			= string
@@ -20,7 +19,6 @@ variable "instances" {
  		name          		= "myvm"
  		vm_num        		= 1
  		vm_size       		= "Standard_D4s_v3"
-		subnet						= "default"
  		subnet_ip_offset  = 4
 		prefix						= null
 		postfix						= null
