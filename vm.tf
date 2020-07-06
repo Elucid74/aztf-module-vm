@@ -1,5 +1,5 @@
 locals {
-	prefix								= var.prefix
+	prefix								= var.instances.prefix
 
   vm_name 							= local.prefix == null ? var.instances.name : "${local.prefix}-${var.instances.name}"
 	vm_size								= var.instances.vm_size
