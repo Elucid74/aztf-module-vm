@@ -203,7 +203,7 @@ resource "azurerm_virtual_machine_extension" "network_watcher" {
 	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Azure.NetworkWatcher"
-	type 						              = "NetworkWatcherAgentWindows"
+	type 						              = local.vm_offer == "WindowsServer" ? "NetworkWatcherAgentWindows" : "NetworkWatcherAgentLinux"
 	type_handler_version 		      = "1.4"
 	auto_upgrade_minor_version 	  = true
 }
@@ -218,7 +218,7 @@ resource "azurerm_virtual_machine_extension" "dependency_agent" {
 	#virtual_machine_name   		    = element(azurerm_virtual_machine.vm.*.name, count.index)
 	
 	publisher 					          = "Microsoft.Azure.Monitoring.DependencyAgent"
-	type 						              = "DependencyAgentWindows"
+	type 						              = local.vm_offer == "WindowsServer" ? "DependencyAgentWindows" : "DependencyAgentLinux"
 	type_handler_version 		      = "9.5"
 	auto_upgrade_minor_version 	  = true
 }
