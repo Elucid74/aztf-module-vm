@@ -29,51 +29,13 @@ variable "instances" {
 	}
 }
 
-
-/*
-variable "prefix" {
-  description = "Prefix for the workspace"
-  default = null
+variable "update_domain_count" {
+  default = 5 
 }
 
-variable "postfix" {
-  description = "Prefix for the workspace"
-  default = null
+variable "fault_domain_count" {
+	default = 2 # Korea regions support up to 2 fault domains
 }
-
-variable "vm_num" {
-  description = "Number of VMs to create"        
-}
-
-variable "vm_name" {
-  description = "VM name following 2 digit index"        
-}
-
-variable "vm_size" {
-  description = "VM size"
-}
-
-variable "subnet_ip_offset"	{
-  description = "IP offset of starting VM IP" 
-  default = null
-}
-
-variable "vm_publisher" {
-		default = "MicrosoftWindowsServer"
-}
-
-variable "vm_offer" {
-		default = "WindowsServer"
-}
-
-variable "vm_sku" {
-		default = "2016-Datacenter"
-}
-
-variable "vm_version" {
-		default = "latest"
-}
-*/
 
 variable "image_id" {
   description = "If specified, VM is created from the image ID"        
