@@ -1,87 +1,245 @@
 # aztf-module-vm
 
-Azure Terraform Module for Virtual Machine
+This is terraform module for deploying azure virtual machine(s).
 
 # input variable 
-prefix           									= "exmp"
-location                          = "westus"
-resource_group_name               = "testResourceGroup"
+To create a VM, below variables shall be set. (mandatory ones)
 
-admin_username                    = "adminusername"
-admin_password                    = "adminpassword"
+```terraform
+variable "resource_group_name" {
+  description = "resource group name"
+} 
 
-subnet_id													=	"id of the subnet"
-subnet_prefix											= "address prefix of the subnet"
-
-instances  = {
-  name          = "svc-a"
-  vm_num        = 2
-  vm_size       = "Standard_D4s_v3"
-  subnet        = "subnet-gmarket-1"
-  subnet_ip_offset  = 5
-  vm_publisher      = "Canonical"
-  vm_offer          = "UbuntuServer"
-  vm_sku            = "16.04.0-LTS"
-  vm_version        = "latest"
+variable "location" {
+  description = "resource location"
 }
 
-  1               = {
-    name          = "svc-c"
-    vm_num        = 2
-    vm_size       = "Standard_D4s_v3"
-    subnet        = "subnet-gmarket-3"
-    subnet_ip_offset  = 5
-		vm_publisher      = "MicrosoftWindowsServer"
-  	vm_offer          = "WindowsServer"
-  	vm_sku            = "2019-Datacenter"
-  	vm_version        = "latest"
+variable "subnet_id" {
+  description = "subnet ID"
+}
+
+variable "subnet_prefix" {
+  description = "subnet prefix"
+}
+
+variable "admin_username" {
+  description = "username for vm admin"
+}
+
+variable "admin_password" {
+  description = "password for vm admin"
+}
+```
+
+Also  you can specify VM details with "instances" variable. If omitted, a Ubuntu VM with below details will be deployed. 
+
+``` 
+variable "instances" {
+  description = "VM instance configuration parameters"
+
+  type = object({
+    name              = string
+    vm_num            = number # if vm_num == 3, myvm001, myvm002, myvm003 will be created.
+    vm_size           = string
+    subnet_ip_offset  = number
+
+    vm_publisher      = string
+    vm_offer          = string
+    vm_sku            = string
+    vm_version        = string
+    prefix            = string
+    postfix           = string
+  })
+
+  default = {
+    name              = "myvm"
+    vm_num            = 1
+    vm_size           = "Standard_D4s_v3"
+    subnet_ip_offset  = 4
+    prefix            = null
+    postfix           = null
+    vm_publisher      = "Canonical"
+    vm_offer          = "UbuntuServer"
+    vm_sku            = "16.04.0-LTS"
+    vm_version        = "latest"
+  }
+}
+```
+
+Below are optional variables. 
+
+```
+# if set, Will deploy MMA(Microsoft Monitoring Agent) VM  extension 
+variable "log_analytics_workspace_id"  {
+  description = "log analytics workspace ID for diagnostics log"
+  default = null
+}
+
+# required for MMA VM Agent
+variable "log_analytics_workspace_key"  {
+  description = "log analytics workspace key for diagnostics log"
+  default = null
+}
+
+# if set, Will deploy Network Watcher VM  extension 
+variable "enable_network_watcher_extension" {
+  description = "true to install network watcher extension"
+  default = false
+}
+
+# if set, Will deploy dependency VM extension 
+variable "enable_dependency_agent" {
+  description = "true to install dependency agent"
+  default = false
+}
+
+# deprecated 
+variable "application_insights_key" {
+  description = "application insights instrumentation key"
+  default = null
+}
+
+# If set, VMs will be associated with a internal load balancer as backend VMs
+variable "load_balancer_param" {
+  description = "load balancer parameters"
+  type = object({
+    sku             = string
+    probe_protocol  = string
+    probe_port      = number
+    probe_interval  = number
+    probe_num       = number
+  })
+
+  default = null
+
+  /* example
+  default = {
+      sku             = "basic"
+      probe_protocol  = "Tcp"
+      probe_port      = 22
+      probe_interval  = 5
+      probe_num       = 2
+  }
+  */
+}
+
+# If set, VMs will be associated with a load balancer outbound address pool for Internet outbound connectivity
+variable "backend_outbound_address_pool_id" {
+  description = "Backend Outbound Address Pool ID of external load balancer. This can be used for assign outbound public IP address pool"
+  default = null
+}
+
+```
+
+Example 1) Create a Ubuntu VM
+
+```
+# terraform.tfvars
+prefix = "demo"
+location = "koreacentral"
+
+resource_groups = {
+  RESOURCEGROUP1     = {
+    name = "-resourcegroup1"
+    location = "koreacentral"
   }
 }
 
+networking_object = {
+  vnet = {
+    name                = "-demo-vnet"
+    address_space       = ["10.10.0.0/16"]
+    dns                 = []
+  }
+  specialsubnets = {}
 
-Example) Create 2 ubuntu VMs in a subnet
+  subnets = {
+    frontend   = {
+      name                = "frontend"
+      cidr                = "10.10.0.0/24"
+      service_endpoints   = []
+      nsg_name            = "frontend"
+    }
+  }
+}
+
+# ./example.tf
+locals {
+  RESOURCEGROUP = lookup(module.resource_group.names, "RESOURCEGROUP1", null)
+  subnet        = var.networking_object.subnets.frontend.name
+}
+
+module "resource_group" {
+  source  = "aztfmod/caf-resource-group/azurerm"
+  version = "0.1.1"
+
+  prefix          = var.prefix
+  resource_groups = var.resource_groups
+  tags            = {}
+}
+
+module "virtual_network" {
+  source  = "github.com/hyundonk/terraform-azurerm-caf-virtual-network"
+
+  virtual_network_rg                = local.RESOURCEGROUP
+  prefix                            = var.prefix
+  location                          = var.location
+  networking_object                 = var.networking_object
+  tags            = {}
+}
+
+module "demo-vm" {
+  source  = "github.com/hyundonk/aztf-module-vm"
+
+  location                          = var.location
+  resource_group_name               = local.RESOURCEGROUP
+
+  subnet_id                         = module.virtual_network.subnet_ids_map[local.subnet]
+  subnet_prefix                     = module.virtual_network.subnet_prefix_map[local.subnet]
+
+  admin_username                    = var.adminusername
+  admin_password                    = var.adminpassword
+}
 ```
-module "service1" {
-  source                            = "git://github.com/hyundonk/aztf-module-vm.git"
 
-  prefix                            = "exmp"
-  vm_num                            = 2
 
-  vm_name                           = "svc1"
-  vm_size                           = "Standard_D2s_v3"
+Example) Create 4 Windows VMs
+```
+module "demo-vm" {
+  source  = "github.com/hyundonk/aztf-module-vm"
 
-  vm_publisher                      = "Canonical"
-  vm_offer                          = "UbuntuServer"
-  vm_sku                            = "16.04.0-LTS"
-  vm_version                        = "latest"
+  location                          = var.location
+  resource_group_name               = local.RESOURCEGROUP
 
-  location                          = "westus"
-  resource_group_name               = "testResourceGroup"
+  instances = {
+    name          = "azuremgr"
+    prefix            = null
+    postfix           = null
 
-  subnet_id                         = azurerm_subnet.example.id
-  subnet_prefix                     = azurerm_subnet.example.address_prefix
+    vm_num        = 4
+    vm_size       = "Standard_F4s"
+    subnet        = "subnet-management"
+    subnet_ip_offset  = 13
+    vm_publisher      = "MicrosoftWindowsServer"
+    vm_offer          = "WindowsServer"
+    vm_sku            = "2016-Datacenter"
+    vm_version        = "latest"
+  }
+  
+  subnet_id                         = module.virtual_network.subnet_ids_map[local.subnet]
+  subnet_prefix                     = module.virtual_network.subnet_prefix_map[local.subnet]
 
-  subnet_ip_offset                  = 4
-
-  admin_username                    = local.admin_username
-  admin_password                    = local.admin_password
+  admin_username                    = var.adminusername
+  admin_password                    = var.adminpassword
 }
 ```
 
 ## VM Naming convention
 
-1) No prefix is given
- 1.1) no postfix
- 	1.1.1) vm_num = 1
-	{name}
- 	1.1.1) vm_num > 1
-  {name}%03d
- 1.2) postfix is given
-  {name}%03d{postfix}
-2) prefix is given
- 1.1) no postfix
-  {prefix}-{name}%03d
- 1.2) postfix is given
+If no prefix is given
+  vm_num = 1 ? {name} : {name}%03d{postfix}
+
+If prefix is given
   {prefix}-{name}%03d{postfix}
 
 
