@@ -203,7 +203,7 @@ module "demo-vm" {
 ```
 
 
-Example) Create 4 Windows VMs
+Example 2) Create 4 Windows VMs
 ```
 module "demo-vm" {
   source  = "github.com/hyundonk/aztf-module-vm"
