@@ -12,19 +12,19 @@ networking_object = {
   vnet = {
     name                = "-demo-vnet"
     address_space       = ["10.10.0.0/16"]
-		dns                 = []
+    dns                 = []
   }
   specialsubnets = {}
   
-	subnets = {
+  subnets = {
     frontend   = {
       name                = "frontend"
       cidr                = "10.10.0.0/24"
       service_endpoints   = []
-			nsg_name						= "frontend"
+      nsg_name						= "frontend"
     }
   }
 }
 
-adminusername = "azureuser"
-adminpassword = "Passw0rd!123"
+adminusername = "theusername"
+adminpassword = "thepassword"
