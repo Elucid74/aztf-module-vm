@@ -15,7 +15,7 @@ module "resource_group" {
 
 module "virtual_network" {
  	source  = "github.com/hyundonk/terraform-azurerm-caf-virtual-network"
-
+  
   virtual_network_rg                = local.RESOURCEGROUP
   prefix                            = var.prefix
 	location                          = var.location
@@ -26,11 +26,15 @@ module "virtual_network" {
 module "demo-vm" {
  	source  = "github.com/hyundonk/aztf-module-vm"
 
+  instances = {
+    name = "example" 
+  }
+
 	location                          = var.location
   resource_group_name               = local.RESOURCEGROUP
 
-	subnet_id                         = module.virtual_network.subnet_ids_map[local.subnet]
-  subnet_prefix                     = module.virtual_network.subnet_prefix_map[local.subnet]
+	subnet_id                         = module.virtual_network.subnet_ids_map["frontend"]
+  subnet_prefix                     = module.virtual_network.subnet_prefix_map["frontend"]
 
 	admin_username                    = var.adminusername
   admin_password                    = var.adminpassword

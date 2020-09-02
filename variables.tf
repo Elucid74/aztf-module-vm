@@ -1,4 +1,4 @@
-variable "instances" {
+variable "instances_defaults" {
   description = "VM instance configuration parameters"
 
 	type = object({
@@ -27,6 +27,10 @@ variable "instances" {
  		vm_sku            = "16.04.0-LTS"
  		vm_version        = "latest"
 	}
+}
+
+variable "instances" {
+  description = "Map of instances  settings to be applied which will be merged with the instances_defaults"
 }
 
 variable "update_domain_count" {

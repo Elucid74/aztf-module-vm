@@ -26,3 +26,5 @@ networking_object = {
   }
 }
 
+adminusername = "azureuser"
+adminpassword = "Passw0rd!123"

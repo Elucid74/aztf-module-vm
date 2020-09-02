@@ -1,18 +1,19 @@
 locals {
-	prefix								= var.instances.prefix
+  merged_instances = merge(var.instances_defaults, var.instances) 
+	prefix								= local.merged_instances.prefix
 
-  vm_name 							= local.prefix == null ? var.instances.name : "${local.prefix}-${var.instances.name}"
-	vm_size								= var.instances.vm_size
-	vm_num								= var.instances.vm_num
-	subnet_ip_offset			= var.instances.subnet_ip_offset
-	vm_publisher					= var.instances.vm_publisher
-	vm_offer							= var.instances.vm_offer
-	vm_sku								= var.instances.vm_sku
-	vm_version						= var.instances.vm_version
-	postfix								= var.instances.postfix
+  vm_name 							= local.prefix == null ? local.merged_instances.name : "${local.prefix}-${local.merged_instances.name}"
+	vm_size								= local.merged_instances.vm_size
+	vm_num								= local.merged_instances.vm_num
+	subnet_ip_offset			= local.merged_instances.subnet_ip_offset
+	vm_publisher					= local.merged_instances.vm_publisher
+	vm_offer							= local.merged_instances.vm_offer
+	vm_sku								= local.merged_instances.vm_sku
+	vm_version						= local.merged_instances.vm_version
+	postfix								= local.merged_instances.postfix
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 
-	enable_accelerated_networking = var.instances.vm_size == "Standard_D2s_v3" ? "false" : "true"
+	enable_accelerated_networking = local.merged_instances.vm_size == "Standard_D2s_v3" ? "false" : "true"
 }
 
 resource "azurerm_availability_set" "avset" {
