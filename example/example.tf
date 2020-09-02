@@ -14,7 +14,7 @@ module "resource_group" {
 
 
 module "virtual_network" {
- 	source  = "github.com/hyundonk/terraform-azurerm-caf-virtual-network"
+  source  = "github.com/hyundonk/terraform-azurerm-caf-virtual-network"
   
   virtual_network_rg                = local.RESOURCEGROUP
   prefix                            = var.prefix
@@ -24,7 +24,7 @@ module "virtual_network" {
 }
 
 module "demo-vm" {
- 	source  = "github.com/hyundonk/aztf-module-vm"
+  source  = "github.com/hyundonk/aztf-module-vm"
 
   instances = {
     name = "example" 
