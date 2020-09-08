@@ -231,6 +231,19 @@ module "demo-vm" {
 
   admin_username                    = var.adminusername
   admin_password                    = var.adminpassword
+  
+  boot_diagnostics_endpoint         = var.my_boot_diagnostics_endpoint
+  custom_data                       = var.my_custom_data
+  
+  diag_storage_account_name         = var.my_diag_storage_account_name
+  diag_storage_account_access_key   = var.my_diag_storage_account_access_key
+  diag_storage_account_endpoint     = var.my_diag_storage_account_endpoint
+  
+  log_analytics_workspace_id        = var.my_log_analytics_workspace_id
+  log_analytics_workspace_key       = var.my_log_analytics_workspace_key
+  
+  enable_network_watcher_extension  = var.my_enable_network_watcher_extension
+  enable_dependency_agent           = var.my_enable_dependency_agent
 }
 ```
 
