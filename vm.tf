@@ -226,6 +226,17 @@ resource "azurerm_virtual_machine_extension" "dependency_agent" {
 	auto_upgrade_minor_version 	  = true
 }
 
+resource "azurerm_virtual_machine_extension" "aadlogin" {
+	  count 						            = var.enable_aadlogin == true ? local.vm_num : 0
+    name                          = "ext-aadlogin-${count.index}"
+	  virtual_machine_id						= element(azurerm_virtual_machine.vm.*.id, count.index)
+    
+    publisher                     = "Microsoft.Azure.ActiveDirectory"
+    type                          = "AADLoginForWindows"
+    type_handler_version          = "0.3"
+    auto_upgrade_minor_version    = true
+}
+
 /*
 resource "azurerm_virtual_machine_extension" "iis" {
 	count					                = var.custom_script_path == "" ? 0 : local.vm_num

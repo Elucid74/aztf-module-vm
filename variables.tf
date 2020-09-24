@@ -126,6 +126,12 @@ variable "enable_dependency_agent" {
   default = false
 }
 
+variable "enable_aadlogin" {
+  description = "true to install aadlogin vm extension" 
+  default = false
+}
+
+
 variable "application_insights_key" {
   description = "application insights instrumentation key"
   default = null
