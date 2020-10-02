@@ -26,5 +26,19 @@ networking_object = {
   }
 }
 
+nodes = {
+  name              = "node"
+  vm_num            = 3
+  vm_size           = "Standard_D2s_v3"
+  subnet_ip_offset  = 4
+  prefix            = null
+  postfix           = null
+  vm_publisher      = "Canonical"
+  vm_offer          = "UbuntuServer"
+  vm_sku            = "16.04.0-LTS"
+  vm_version        = "latest"
+}
+
+# below is for illustration purpose. In actual environment, do not specifiy user credentials in the code. Instead use key vault or environmental variable such as TF_VAR_adminusername, TF_VAR_adminpassword. 
 adminusername = "theusername"
-adminpassword = "thepassword"
+adminpassword = "thePassw0rd"

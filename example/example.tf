@@ -23,12 +23,10 @@ module "virtual_network" {
   tags            = {}
 }
 
-module "demo-vm" {
+module "example" {
   source  = "github.com/hyundonk/aztf-module-vm"
 
-  instances = {
-    name = "example" 
-  }
+  instances = var.nodes
 
   location                          = var.location
   resource_group_name               = local.RESOURCEGROUP
