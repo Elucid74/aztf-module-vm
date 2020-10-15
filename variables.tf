@@ -165,3 +165,8 @@ variable "backend_outbound_address_pool_id" {
   default = null
 }
 
+variable "backend_address_pool_id" {
+  description = "Application Gateway backend address pool id"
+  default = null	
+}
+
