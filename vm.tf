@@ -136,6 +136,15 @@ resource "azurerm_network_interface_backend_address_pool_association" "associati
 	backend_address_pool_id   = var.backend_outbound_address_pool_id
 }
 
+
+resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "association" {
+	count                     = var.backend_address_pool_id == null ? 0 : local.vm_num
+	
+	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
+	ip_configuration_name     = "ipconfig0"
+	backend_address_pool_id   = var.backend_address_pool_id
+}
+
 # Refer https://docs.microsoft.com/en-us/azure/azure-monitor/platform/diagnostics-extension-schema-windows
 resource "azurerm_virtual_machine_extension" "diagnostics" {
 	count                         = var.diag_storage_account_name == null ? 0 : local.vm_offer == "WindowsServer" ? local.vm_num : 0
@@ -262,13 +271,6 @@ resource "azurerm_virtual_machine_extension" "iis" {
 	SETTINGS
 }
 
-resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "association" {
-	count                     = var.backend_address_pool_id == null ? 0 : local.vm_num
-	
-	network_interface_id      = element(azurerm_network_interface.nic.*.id, count.index)
-	ip_configuration_name     = "ipconfig0"
-	backend_address_pool_id   = var.backend_address_pool_id
-}
 
 resource "azurerm_network_interface_application_gateway_backend_address_pool_association" "association2" {
 	count                     = var.backend_address_pool_id2 == null ? 0 : local.vm_num
