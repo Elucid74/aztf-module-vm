@@ -102,7 +102,7 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
   dynamic "os_profile_linux_config" {
-    for_each = local.vm_offer == "UbuntuServer" ? ["UbuntuServer"] : []
+    for_each = local.vm_offer != "WindowsServer" ? ["UbuntuServer"] : []
     content {
       disable_password_authentication = false
     }
