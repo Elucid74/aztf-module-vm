@@ -95,7 +95,7 @@ resource "azurerm_virtual_machine" "vm" {
 	}
   
   dynamic "storage_data_disk" {
-    for_each = var.data_disk_size == 0 ? [] : ["DataDisk"]
+    for_each = var.data_disk_size == null ? [] : ["DataDisk"]
     content {
 		  name        	      = local.vm_num == 1 ? "${local.vm_name}-datadisk" : local.postfix == null ? format("%s%03d-datadisk", local.vm_name, count.index + 1) : format("%s%03d%s-datadisk", local.vm_name, count.index + 1, local.postfix) 
       managed_disk_type   = "Premium_LRS"
