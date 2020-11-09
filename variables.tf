@@ -29,6 +29,15 @@ variable "instances_defaults" {
 	}
 }
 
+variable "data_disk" {
+	type = object({
+		name 							= string
+		id    						= string
+		size              = int
+	})
+  default = null
+}
+
 variable "instances" {
   description = "Map of instances  settings to be applied which will be merged with the instances_defaults"
 }

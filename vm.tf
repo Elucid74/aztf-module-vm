@@ -107,13 +107,13 @@ resource "azurerm_virtual_machine" "vm" {
 	}
   
   dynamic "storage_data_disk" {
-    for_each = var.data_disk_size == null ? [] : ["DataDisk"]
+    for_each = var.data_disk == null ? [] : ["DataDisk"]
     content {
-		  name        	      = local.vm_num == 1 ? "${local.vm_name}-datadisk" : local.postfix == null ? format("%s%03d-datadisk", local.vm_name, count.index + 1) : format("%s%03d%s-datadisk", local.vm_name, count.index + 1, local.postfix) 
-      managed_disk_type   = "Premium_LRS"
-      create_option       = "Empty"
+		  name        	      = var.data_disk.name
+      managed_disk_id     = var.data_disk.id
+      create_option       = "Attach"
       lun                 = 0
-      disk_size_gb        = var.data_disk_size
+      disk_size_gb        = var.data_disk.size
     }
   }
  
