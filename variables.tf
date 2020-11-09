@@ -33,7 +33,7 @@ variable "data_disk" {
 	type = object({
 		name 							= string
 		id    						= string
-		size              = int
+		size              = number
 	})
   default = null
 }
