@@ -76,7 +76,7 @@ resource "azurerm_virtual_machine" "vm" {
 
 	availability_set_id                   = local.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
 
-	proximity_place_group_id              = var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.id : null
+	proximity_placement_group_id              = var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.id : null
 
 	storage_image_reference {
 		id                    = var.image_id
