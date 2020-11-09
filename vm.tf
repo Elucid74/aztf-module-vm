@@ -29,6 +29,14 @@ resource "azurerm_availability_set" "avset" {
 	managed                       = true
 }
 
+resource "azurerm_proximity_placement_group" "ppg" {
+  count                         = var.enable_proximity_place_group == true ? 1 : 0 # create only if multiple instances cases
+
+  name                          = "${local.vm_name}-ppg"
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+}
+
 resource "azurerm_network_interface" "nic" {
 	count 					                      = local.vm_num
 	name         													= local.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d-nic", local.vm_name, count.index + 1)
@@ -67,6 +75,8 @@ resource "azurerm_virtual_machine" "vm" {
   delete_data_disks_on_termination 			= true
 
 	availability_set_id                   = local.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
+
+	proximity_place_group_id              = var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.id : null
 
 	storage_image_reference {
 		id                    = var.image_id
