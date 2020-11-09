@@ -175,3 +175,6 @@ variable "data_disk_size" {
   default = null	
 }
 
+variable "enable_proximity_place_group" {
+  default = false
+}
