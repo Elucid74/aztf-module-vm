@@ -27,6 +27,8 @@ resource "azurerm_availability_set" "avset" {
 	platform_fault_domain_count   = var.fault_domain_count
 
 	managed                       = true
+	
+	proximity_placement_group_id	= var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.0.id : null
 }
 
 resource "azurerm_proximity_placement_group" "ppg" {
