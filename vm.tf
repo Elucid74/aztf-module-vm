@@ -105,7 +105,7 @@ resource "azurerm_virtual_machine" "vm" {
     admin_password        = var.admin_password
     custom_data           = var.custom_data == null ? null : filebase64(var.custom_data)
 	}
-  
+/*  
   dynamic "storage_data_disk" {
     for_each = var.data_disk == null ? [] : ["DataDisk"]
     content {
@@ -114,6 +114,17 @@ resource "azurerm_virtual_machine" "vm" {
       create_option       = "Attach"
       lun                 = 0
       disk_size_gb        = var.data_disk.size
+    }
+  }
+*/ 
+  dynamic "storage_data_disk" {
+    for_each = var.data_disk_size == 0 ? [] : ["DataDisk"]
+    content {
+		  name        	      = local.vm_num == 1 ? "${local.vm_name}-datadisk" : local.postfix == null ? format("%s%03d-datadisk", local.vm_name, count.index + 1) : format("%s%03d%s-datadisk", local.vm_name, count.index + 1, local.postfix) 
+      managed_disk_type   = "Premium_LRS"
+      create_option       = "Empty"
+      lun                 = 0
+      disk_size_gb        = var.data_disk_size
     }
   }
  
