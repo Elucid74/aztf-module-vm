@@ -30,11 +30,6 @@ variable "instances_defaults" {
 }
 
 variable "data_disk" {
-	type = object({
-		name 							= string
-		id    						= string
-		size              = number
-	})
   default = null
 }
 
