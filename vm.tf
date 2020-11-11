@@ -118,13 +118,13 @@ resource "azurerm_virtual_machine" "vm" {
   }
 */ 
   dynamic "storage_data_disk" {
-    for_each = var.data_disk_size == null ? [] : ["DataDisk"]
+    for_each = var.data_disk_size == null ? [] : var.data_disk
     content {
-		  name        	      = local.vm_num == 1 ? "${local.vm_name}-datadisk" : local.postfix == null ? format("%s%03d-datadisk", local.vm_name, count.index + 1) : format("%s%03d%s-datadisk", local.vm_name, count.index + 1, local.postfix) 
-      managed_disk_type   = "Premium_LRS"
+		  name        	      = local.vm_num == 1 ? format("%s-datadisk-%02d", local.vm_name, storage_data_disk.key) : local.postfix == null ? format("%s%03d-datadisk-%02d", local.vm_name, count.index + 1, storage_data_disk.key) : format("%s%03d%s-datadisk-%02d", local.vm_name, count.index + 1, local.postfix, storage_data_disk.key) 
+      managed_disk_type   = storage_data_disk.value.type # "Premium_LRS"
       create_option       = "Empty"
-      lun                 = 0
-      disk_size_gb        = var.data_disk_size
+      lun                 = storage_data_disk.key
+      disk_size_gb        = storage_data_disk.value.disk_size
     }
   }
  
