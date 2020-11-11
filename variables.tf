@@ -30,7 +30,7 @@ variable "instances_defaults" {
 }
 
 variable "data_disk" {
-  default = null
+  default = {}
 }
 
 variable "instances" {
