@@ -1,34 +1,34 @@
 locals {
   merged_instances = merge(var.instances_defaults, var.instances) 
-	prefix								= local.merged_instances.prefix
+  prefix								= local.merged_instances.prefix
 
   vm_name 							= local.prefix == null ? local.merged_instances.name : "${local.prefix}-${local.merged_instances.name}"
-	vm_size								= local.merged_instances.vm_size
-	vm_num								= local.merged_instances.vm_num
-	subnet_ip_offset			= local.merged_instances.subnet_ip_offset
-	vm_publisher					= local.merged_instances.vm_publisher
-	vm_offer							= local.merged_instances.vm_offer
-	vm_sku								= local.merged_instances.vm_sku
-	vm_version						= local.merged_instances.vm_version
-	postfix								= local.merged_instances.postfix
+  vm_size								= local.merged_instances.vm_size
+  vm_num								= local.merged_instances.vm_num
+  subnet_ip_offset			= local.merged_instances.subnet_ip_offset
+  vm_publisher					= local.merged_instances.vm_publisher
+  vm_offer							= local.merged_instances.vm_offer
+  vm_sku								= local.merged_instances.vm_sku
+  vm_version						= local.merged_instances.vm_version
+  postfix								= local.merged_instances.postfix
   storageAccountName    = var.diag_storage_account_name == null ? null : element(split("/", var.diag_storage_account_name), 8)
 
-	enable_accelerated_networking = local.merged_instances.vm_size == "Standard_D2s_v3" ? "false" : "true"
+  enable_accelerated_networking = local.merged_instances.vm_size == "Standard_D2s_v3" ? "false" : "true"
 }
 
 resource "azurerm_availability_set" "avset" {
-	count                         = local.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
+  count                         = local.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
 
-	name                  	      = "${local.vm_name}-avset"
-	location              	      = var.location
-	resource_group_name  	        = var.resource_group_name
+  name                  	      = "${local.vm_name}-avset"
+  location              	      = var.location
+  resource_group_name  	        = var.resource_group_name
 	
   platform_update_domain_count  = var.update_domain_count
-	platform_fault_domain_count   = var.fault_domain_count
+  platform_fault_domain_count   = var.fault_domain_count
 
-	managed                       = true
+  managed                       = true
 	
-	proximity_placement_group_id	= var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.0.id : null
+  proximity_placement_group_id	= var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.0.id : null
 }
 
 resource "azurerm_proximity_placement_group" "ppg" {
@@ -40,76 +40,77 @@ resource "azurerm_proximity_placement_group" "ppg" {
 }
 
 resource "azurerm_network_interface" "nic" {
-	count 					                      = local.vm_num
-	name         													= local.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d-nic", local.vm_name, count.index + 1)
+  count 					                      = local.vm_num
+  name         													= local.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d-nic", local.vm_name, count.index + 1)
 
-	location            	                = var.location
-	resource_group_name  	                = var.resource_group_name
+  location            	                = var.location
+  resource_group_name  	                = var.resource_group_name
 	
-	ip_configuration {
-			name 															= "ipconfig0"
-      subnet_id 												= var.subnet_id
-	    private_ip_address_allocation     = local.subnet_ip_offset == null ? "dynamic" : "static"
+  ip_configuration {
+    name 															= "ipconfig0"
+    subnet_id 												= var.subnet_id
+    private_ip_address_allocation     = local.subnet_ip_offset == null ? "dynamic" : "static"
     
-      # if subnet_ip_offset is not set, use dynamic ip address. If load balancer is used, reserve the first ip to load balancer and assign the next ip address(es) to vm(s)
-			private_ip_address                = local.subnet_ip_offset == null ? null : var.load_balancer_param == null? cidrhost(var.subnet_prefix, local.subnet_ip_offset + count.index) : cidrhost(var.subnet_prefix, local.subnet_ip_offset + 1 + count.index)
-			public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
-	}
+    # if subnet_ip_offset is not set, use dynamic ip address. If load balancer is used, reserve the first ip to load balancer and assign the next ip address(es) to vm(s)
+    private_ip_address                = local.subnet_ip_offset == null ? null : var.load_balancer_param == null? cidrhost(var.subnet_prefix, local.subnet_ip_offset + count.index) : cidrhost(var.subnet_prefix, local.subnet_ip_offset + 1 + count.index)
+    public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
+  }
   
-  enable_accelerated_networking       	= local.enable_accelerated_networking
+    enable_accelerated_networking       	= local.enable_accelerated_networking
 }
 
 resource "azurerm_virtual_machine" "vm" {
-	lifecycle {
-  	ignore_changes = [ # don't recreate existing disk
-			storage_os_disk
+  lifecycle {
+    ignore_changes = [ # don't recreate existing disk
+      storage_os_disk
 		]
-	}
+  }
 
-	count					                        = local.vm_num
-	name                  								= local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
+  count					                        = local.vm_num
+  name                  								= local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
 
-	location        	   	                = var.location
+  location        	   	                = var.location
   resource_group_name 	                = var.resource_group_name
-	vm_size               	              = local.vm_size
+  vm_size               	              = local.vm_size
 
   delete_os_disk_on_termination 				= true
   delete_data_disks_on_termination 			= true
 
-	availability_set_id                   = local.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
+  availability_set_id                   = local.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
 
-	proximity_placement_group_id              = var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.0.id : null
+  proximity_placement_group_id              = var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.0.id : null
 
-	storage_image_reference {
-		id                    = var.image_id
-		publisher             = local.vm_publisher
-		offer                 = local.vm_offer
-		sku                   = local.vm_sku
-		version               = local.vm_version
-	}
+  storage_image_reference {
+    id                    = var.image_id
+    publisher             = var.image_id != null ? null : local.vm_publisher
+    offer                 = var.image_id != null ? null : local.vm_offer
+    sku                   = var.image_id != null ? null : local.vm_sku
+    version               = var.image_id != null ? null : local.vm_version
+  }
 
-	storage_os_disk {
-		name        	= local.vm_num == 1 ? "${local.vm_name}-osdisk" : local.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, local.postfix) 
-		caching       		    = "ReadWrite"
-		create_option 		    = "FromImage"
-		managed_disk_type 	  = "Premium_LRS"
-	}
+  storage_os_disk {
+    name        	= local.vm_num == 1 ? "${local.vm_name}-osdisk" : local.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, local.postfix) 
+    caching       		    = "ReadWrite"
+    create_option 		    = "FromImage"
+    managed_disk_type 	  = "Premium_LRS"
+  }
 
   identity { # added to enable 'Azure Monitor Sink' feature
     type = "SystemAssigned"
   }
 
-	os_profile {
-		computer_name					= local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
+  os_profile {
+    computer_name					= local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
     admin_username        = var.admin_username
     admin_password        = var.admin_password
-    custom_data           = var.custom_data == null ? null : filebase64(var.custom_data)
-	}
+    custom_data           = var.custom_data == null ? null : var.custom_data
+    #custom_data           = var.custom_data == null ? null : filebase64(var.custom_data)
+  }
 /*  
   dynamic "storage_data_disk" {
     for_each = var.data_disk == null ? [] : ["DataDisk"]
     content {
-		  name        	      = var.data_disk.name
+      name        	      = var.data_disk.name
       managed_disk_id     = var.data_disk.id
       create_option       = "Attach"
       lun                 = 0
@@ -120,7 +121,7 @@ resource "azurerm_virtual_machine" "vm" {
   dynamic "storage_data_disk" {
     for_each = var.data_disk
     content {
-		  name        	      = local.vm_num == 1 ? format("%s-datadisk-%02d", local.vm_name, storage_data_disk.key) : local.postfix == null ? format("%s%03d-datadisk-%02d", local.vm_name, count.index + 1, storage_data_disk.key) : format("%s%03d%s-datadisk-%02d", local.vm_name, count.index + 1, local.postfix, storage_data_disk.key) 
+      name        	      = local.vm_num == 1 ? format("%s-datadisk-%02d", local.vm_name, storage_data_disk.key) : local.postfix == null ? format("%s%03d-datadisk-%02d", local.vm_name, count.index + 1, storage_data_disk.key) : format("%s%03d%s-datadisk-%02d", local.vm_name, count.index + 1, local.postfix, storage_data_disk.key) 
       managed_disk_type   = storage_data_disk.value.type # "Premium_LRS"
       create_option       = "Empty"
       lun                 = storage_data_disk.key
@@ -131,27 +132,39 @@ resource "azurerm_virtual_machine" "vm" {
   dynamic "os_profile_windows_config" {
     for_each = local.vm_offer == "WindowsServer" ? ["WindowsServer"] : []
     content {
-		  provision_vm_agent    = true
+      provision_vm_agent    = true
     }
   }
 
   dynamic "os_profile_linux_config" {
-    for_each = local.vm_offer != "WindowsServer" ? ["UbuntuServer"] : []
+    for_each = local.vm_offer == "WindowsServer" ? [] : var.ssh_key_data != null ? [1] : []
+    content {
+      disable_password_authentication = true
+      ssh_keys {
+        key_data  = var.ssh_key_data
+        path      = var.ssh_key_path
+      }
+    }
+
+  }
+	
+  dynamic "os_profile_linux_config" {
+    for_each = local.vm_offer == "WindowsServer" ? [] : var.ssh_key_data != null ? [] : [1]
     content {
       disable_password_authentication = false
     }
   }
-	
+
   dynamic "boot_diagnostics" {
     for_each = var.boot_diagnostics_endpoint == null ? [] : ["BootDiagnostics"]
     content {
-		  enabled               = var.boot_diagnostics_endpoint != null ? true : false
-		  storage_uri           = var.boot_diagnostics_endpoint
+      enabled               = var.boot_diagnostics_endpoint != null ? true : false
+      storage_uri           = var.boot_diagnostics_endpoint
     }
-	}
+  }
 
-	#network_interface_ids  = [element(azurerm_network_interface.nic.*.id, count.index)]
-	network_interface_ids   = [element(concat(azurerm_network_interface.nic.*.id, list("")), count.index)]
+  #network_interface_ids  = [element(azurerm_network_interface.nic.*.id, count.index)]
+  network_interface_ids   = [element(concat(azurerm_network_interface.nic.*.id, list("")), count.index)]
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "association" {

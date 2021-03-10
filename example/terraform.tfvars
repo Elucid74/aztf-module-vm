@@ -28,7 +28,7 @@ networking_object = {
 
 nodes = {
   name              = "node"
-  vm_num            = 3
+  vm_num            = 1
   vm_size           = "Standard_D2s_v3"
   subnet_ip_offset  = 4
   prefix            = null
@@ -42,3 +42,6 @@ nodes = {
 # below is for illustration purpose. In actual environment, do not specifiy user credentials in the code. Instead use key vault or environmental variable such as TF_VAR_adminusername, TF_VAR_adminpassword. 
 adminusername = "theusername"
 adminpassword = "thePassw0rd"
+
+#image_id          = "enter image id here when using custom image rather than market place image"
+

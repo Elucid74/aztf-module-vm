@@ -83,7 +83,19 @@ variable "admin_username" {
 
 variable "admin_password" {
   description = "password for vm admin"
+  default = null
 }
+
+variable "ssh_key_path" {
+  description = "ssh key path"
+  default = null # should be set to "/home/${var.admin_username}/.ssh/authorized_keys"
+}
+
+variable "ssh_key_data" {
+  description = "ssh key data"
+  default = null
+}
+
 
 variable "boot_diagnostics_endpoint" {
   description = "blob storage URL for boot diagnostics"
