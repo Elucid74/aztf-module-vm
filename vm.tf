@@ -165,6 +165,8 @@ resource "azurerm_virtual_machine" "vm" {
 
   #network_interface_ids  = [element(azurerm_network_interface.nic.*.id, count.index)]
   network_interface_ids   = [element(concat(azurerm_network_interface.nic.*.id, list("")), count.index)]
+
+  tags = var.tags
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "association" {
