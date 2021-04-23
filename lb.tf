@@ -13,6 +13,7 @@ resource "azurerm_lb" "lb" {
     private_ip_address            = local.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, local.subnet_ip_offset)
     private_ip_address_allocation = local.subnet_ip_offset == null ? "dynamic" : "static"
   }
+  tags = var.tags
 }
 
 resource "azurerm_lb_probe" "probe" {
