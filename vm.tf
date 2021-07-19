@@ -92,7 +92,7 @@ resource "azurerm_virtual_machine" "vm" {
     name        	=  var.load_balancer_param == null ? "${local.vm_name}-osdisk" : local.postfix == null ? format("%s%02d-osdisk", local.vm_name, count.index + 1) : format("%s%02d%s-osdisk", local.vm_name, count.index + 1, local.postfix) 
     caching       		    = "ReadWrite"
     create_option 		    = "FromImage"
-    managed_disk_type 	  = "Premium_LRS"
+    managed_disk_type 	  = var.os_disk_type # "Premium_LRS"
     disk_size_gb          = var.os_disk_size
   }
 
