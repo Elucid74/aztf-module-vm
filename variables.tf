@@ -186,6 +186,11 @@ variable "backend_address_pool_id" {
   default = null	
 }
 
+variable "os_disk_size" {
+  description = "OS Disk Size in GB"
+  default = null	
+}
+
 variable "data_disk_size" {
   description = "Data Disk Size in GB"
   default = null	

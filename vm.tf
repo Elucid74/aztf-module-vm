@@ -93,6 +93,7 @@ resource "azurerm_virtual_machine" "vm" {
     caching       		    = "ReadWrite"
     create_option 		    = "FromImage"
     managed_disk_type 	  = "Premium_LRS"
+    disk_size_gb          = var.os_disk_size
   }
 
   identity { # added to enable 'Azure Monitor Sink' feature
