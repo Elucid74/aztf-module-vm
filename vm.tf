@@ -17,7 +17,7 @@ locals {
 }
 
 resource "azurerm_availability_set" "avset" {
-  count                         = var.load_balancer_param == null ? 0 : 1 # create only if load balancer exists
+  count                         = local.vm_num == 1 ? 0 : 1 # create only if multiple instances cases
 
   name                  	      = "${local.vm_name}-avset"
   location              	      = var.location
@@ -41,7 +41,7 @@ resource "azurerm_proximity_placement_group" "ppg" {
 
 resource "azurerm_network_interface" "nic" {
   count 					                      = local.vm_num
-  name         													= var.load_balancer_param == null ? "${local.vm_name}-nic" : format("%s%02d-nic", local.vm_name, count.index + 1)
+  name                                  = local.vm_num == 1 ? "${local.vm_name}-nic" : format("%s%03d-nic", local.vm_name, count.index + 1)
 
   location            	                = var.location
   resource_group_name  	                = var.resource_group_name
@@ -67,7 +67,7 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
   count					                        = local.vm_num
-  name                  								= var.load_balancer_param == null ? local.vm_name: local.postfix == null ? format("%s%02d", local.vm_name, count.index + 1) : format("%s%02d%s", local.vm_name, count.index + 1, local.postfix) 
+  name                                  = local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
 
   location        	   	                = var.location
   resource_group_name 	                = var.resource_group_name
@@ -76,7 +76,7 @@ resource "azurerm_virtual_machine" "vm" {
   delete_os_disk_on_termination 				= true
   delete_data_disks_on_termination 			= true
 
-  availability_set_id                   = var.load_balancer_param == null ? null : azurerm_availability_set.avset.0.id
+  availability_set_id                   = local.vm_num == 1 ? null : azurerm_availability_set.avset.0.id
 
   proximity_placement_group_id              = var.enable_proximity_place_group == true ? azurerm_proximity_placement_group.ppg.0.id : null
 
@@ -89,7 +89,8 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
   storage_os_disk {
-    name        	=  var.load_balancer_param == null ? "${local.vm_name}-osdisk" : local.postfix == null ? format("%s%02d-osdisk", local.vm_name, count.index + 1) : format("%s%02d%s-osdisk", local.vm_name, count.index + 1, local.postfix) 
+    name          = local.vm_num == 1 ? "${local.vm_name}-osdisk" : local.postfix == null ? format("%s%03d-osdisk", local.vm_name, count.index + 1) : format("%s%03d%s-osdisk", local.vm_name, count.index + 1, local.postfix) 
+
     caching       		    = "ReadWrite"
     create_option 		    = "FromImage"
     managed_disk_type 	  = var.os_disk_type # "Premium_LRS"
@@ -101,7 +102,7 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
   os_profile {
-    computer_name					= var.load_balancer_param == null ? local.vm_name: local.postfix == null ? format("%s%02d", local.vm_name, count.index + 1) : format("%s%02d%s", local.vm_name, count.index + 1, local.postfix) 
+    computer_name          = local.vm_num == 1 ? local.vm_name: local.postfix == null ? format("%s%03d", local.vm_name, count.index + 1) : format("%s%03d%s", local.vm_name, count.index + 1, local.postfix) 
     admin_username        = var.admin_username
     admin_password        = var.admin_password
     custom_data           = var.custom_data == null ? null : var.custom_data
@@ -122,7 +123,7 @@ resource "azurerm_virtual_machine" "vm" {
   dynamic "storage_data_disk" {
     for_each = var.data_disk
     content {
-      name        	      =  var.load_balancer_param == null ? format("%s-datadisk-%02d", local.vm_name, storage_data_disk.key) : local.postfix == null ? format("%s%02d-datadisk-%02d", local.vm_name, count.index + 1, storage_data_disk.key) : format("%s%02d%s-datadisk-%02d", local.vm_name, count.index + 1, local.postfix, storage_data_disk.key) 
+      name                = local.vm_num == 1 ? format("%s-datadisk-%02d", local.vm_name, storage_data_disk.key) : local.postfix == null ? format("%s%03d-datadisk-%02d", local.vm_name, count.index + 1, storage_data_disk.key) : format("%s%03d%s-datadisk-%02d", local.vm_name, count.index + 1, local.postfix, storage_data_disk.key) 
       managed_disk_type   = storage_data_disk.value.type # "Premium_LRS"
       create_option       = "Empty"
       lun                 = storage_data_disk.key
