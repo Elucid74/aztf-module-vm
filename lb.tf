@@ -10,7 +10,7 @@ resource "azurerm_lb" "lb" {
   frontend_ip_configuration {
     name                          = "lb-frontend-ip"
     subnet_id                     = var.subnet_id
-    private_ip_address            = local.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, local.subnet_ip_offset)
+    private_ip_address            = load_balancer_ip == null ? (local.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, local.subnet_ip_offset)) : load_balancer_ip
     private_ip_address_allocation = local.subnet_ip_offset == null ? "dynamic" : "static"
   }
   tags = var.tags
