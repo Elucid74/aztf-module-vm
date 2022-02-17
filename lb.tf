@@ -12,7 +12,7 @@ resource "azurerm_lb" "lb" {
     public_ip_address_id          = var.load_balancer_pip_id
 
     subnet_id                     = var.load_balancer_pip_id == null ? var.subnet_id : null
-    private_ip_address            = var.load_balancer_pip_id == null ? (local.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, local.subnet_ip_offset)) : null
+    private_ip_address            = var.load_balancer_pip_id == null ? (var.load_balancer_ip == null ? (local.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, local.subnet_ip_offset)) : var.load_balancer_ip) : null
     private_ip_address_allocation = var.load_balancer_pip_id == null ? (local.subnet_ip_offset == null ? "dynamic" : "static") : null
 
     gateway_load_balancer_frontend_ip_configuration_id = var.gateway_load_balancer_id

@@ -162,6 +162,11 @@ variable "gateway_load_balancer_id" {
 }
 
 
+variable "load_balancer_ip" {
+  description = "load balancer IP (internal)"
+  default = null
+}
+
 variable "load_balancer_param" {
   description = "load balancer parameters"
   type = object({
