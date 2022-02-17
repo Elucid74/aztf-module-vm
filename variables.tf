@@ -153,6 +153,15 @@ variable "application_insights_key" {
   default = null
 }
 
+variable "load_balancer_pip_id" {
+  default = null
+}
+
+variable "gateway_load_balancer_id" {
+  default = null
+}
+
+
 variable "load_balancer_param" {
   description = "load balancer parameters"
   type = object({

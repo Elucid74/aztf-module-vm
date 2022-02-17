@@ -9,9 +9,13 @@ resource "azurerm_lb" "lb" {
     
   frontend_ip_configuration {
     name                          = "lb-frontend-ip"
-    subnet_id                     = var.subnet_id
-    private_ip_address            = local.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, local.subnet_ip_offset)
-    private_ip_address_allocation = local.subnet_ip_offset == null ? "dynamic" : "static"
+    public_ip_address_id          = var.load_balancer_pip_id
+
+    subnet_id                     = var.load_balancer_pip_id == null ? var.subnet_id : null
+    private_ip_address            = var.load_balancer_pip_id == null ? (local.subnet_ip_offset == null ? null : cidrhost(var.subnet_prefix, local.subnet_ip_offset)) : null
+    private_ip_address_allocation = var.load_balancer_pip_id == null ? (local.subnet_ip_offset == null ? "dynamic" : "static") : null
+
+    gateway_load_balancer_frontend_ip_configuration_id = var.gateway_load_balancer_id
   }
   tags = var.tags
 }
@@ -31,8 +35,6 @@ resource "azurerm_lb_probe" "probe" {
 
 resource "azurerm_lb_backend_address_pool" "lb" {
   count                 = var.load_balancer_param == null ? 0 : 1
-
-  resource_group_name   = azurerm_lb.lb.0.resource_group_name
   loadbalancer_id       = azurerm_lb.lb.0.id
   name                  = "backendpool"
 }
@@ -50,7 +52,7 @@ resource "azurerm_lb_rule" "https" {
   backend_port                    = 443
 
   frontend_ip_configuration_name  = "lb-frontend-ip"
-    
+   
 	backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
   probe_id                        = azurerm_lb_probe.probe.0.id
   depends_on                      = [azurerm_lb_probe.probe]
