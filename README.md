@@ -32,6 +32,14 @@ variable "admin_password" {
 ```
 
 Also  you can specify VM details with "instances" variable. If omitted, a Ubuntu VM with below details will be deployed. 
+You can use "az vm image" command to get list of VM image offers as the example below.
+```
+$ az vm image list-skus -l koreacentral -f 0001-com-ubuntu-server-focal -p Canonical -o table
+Location      Name
+------------  --------------
+KoreaCentral  20_04-lts
+KoreaCentral  20_04-lts-gen2
+```
 
 ``` 
 variable "instances" {
