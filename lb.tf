@@ -37,10 +37,55 @@ resource "azurerm_lb_backend_address_pool" "lb" {
   count                 = var.load_balancer_param == null ? 0 : 1
   loadbalancer_id       = azurerm_lb.lb.0.id
   name                  = "backendpool"
+
+  dynamic "tunnel_interface" {
+    for_each = var.load_balancer_param.sku == "Gateway" ? ["Gateway"] : []
+    content {
+      identifier  = 800
+      type        = "Internal"
+      protocol    = "VXLAN"
+      port        = 2000
+    }
+  }
+
+  dynamic "tunnel_interface" {
+    for_each = var.load_balancer_param.sku == "Gateway" ? ["Gateway"] : []
+    content {
+      identifier  = 801
+      type        = "External"
+      protocol    = "VXLAN"
+      port        = 2001
+    }
+  }
 }
 
+resource "azurerm_lb_rule" "ha" {
+  count                           = var.load_balancer_param.sku == "Gateway" ? 1 : 0
+
+  resource_group_name             = azurerm_lb.lb.0.resource_group_name
+  loadbalancer_id                 = azurerm_lb.lb.0.id
+
+	name		                        = "ha"
+
+  protocol                        = "All"
+  frontend_port                   = 0
+  backend_port                    = 0
+ 
+  frontend_ip_configuration_name  = "lb-frontend-ip"
+   
+	#backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
+  backend_address_pool_ids        = [azurerm_lb_backend_address_pool.lb.0.id]
+  
+  probe_id                        = azurerm_lb_probe.probe.0.id
+  depends_on                      = [azurerm_lb_probe.probe]
+
+  enable_floating_ip              = false # must be false when used for internal load balancing
+	idle_timeout_in_minutes         = 4
+}
+
+
 resource "azurerm_lb_rule" "https" {
-  count                           = var.load_balancer_param == null ? 0 : 1
+  count                           = var.load_balancer_param == null ? 0 : (var.load_balancer_param.sku == "Gateway" ? 0 : 1)
 
   resource_group_name             = azurerm_lb.lb.0.resource_group_name
   loadbalancer_id                 = azurerm_lb.lb.0.id
@@ -53,7 +98,8 @@ resource "azurerm_lb_rule" "https" {
 
   frontend_ip_configuration_name  = "lb-frontend-ip"
    
-	backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
+	#backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
+  backend_address_pool_ids        = [azurerm_lb_backend_address_pool.lb.0.id]
   probe_id                        = azurerm_lb_probe.probe.0.id
   depends_on                      = [azurerm_lb_probe.probe]
 
@@ -64,7 +110,7 @@ resource "azurerm_lb_rule" "https" {
 }
 
 resource "azurerm_lb_rule" "http" {
-  count                           = var.load_balancer_param == null ? 0 : 1
+  count                           = var.load_balancer_param == null ? 0 : (var.load_balancer_param.sku == "Gateway" ? 0 : 1)
   
   resource_group_name             = azurerm_lb.lb.0.resource_group_name
   loadbalancer_id                 = azurerm_lb.lb.0.id
@@ -77,7 +123,9 @@ resource "azurerm_lb_rule" "http" {
     
   frontend_ip_configuration_name  = "lb-frontend-ip"
     
-  backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
+  #backend_address_pool_id         = azurerm_lb_backend_address_pool.lb.0.id
+  backend_address_pool_ids         = [azurerm_lb_backend_address_pool.lb.0.id]
+
   probe_id                        = azurerm_lb_probe.probe.0.id
   depends_on                      = [azurerm_lb_probe.probe]
 

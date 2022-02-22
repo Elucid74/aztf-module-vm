@@ -59,6 +59,25 @@ resource "azurerm_network_interface" "nic" {
     enable_accelerated_networking       	= local.enable_accelerated_networking
 }
 
+resource "azurerm_network_interface" "nic2" {
+  count 					                      = var.add_second_nic == false ? 0 : local.vm_num
+  name                                  = local.vm_num == 1 ? "${local.vm_name}-nic2" : format("%s%03d-nic2", local.vm_name, count.index + 1)
+
+  location            	                = var.location
+  resource_group_name  	                = var.resource_group_name
+	
+  ip_configuration {
+    name 															= "ipconfig0"
+    subnet_id 												= var.subnet_id_second_nic
+    private_ip_address_allocation     = "dynamic"
+    
+    private_ip_address                = cidrhost(var.subnet_prefix_second_nic, local.subnet_ip_offset + count.index)
+    public_ip_address_id              = var.public_ip_id_second_nic == null ? null : var.public_ip_id_second_nic[count.index]
+  }
+  
+  enable_accelerated_networking       	= local.enable_accelerated_networking
+}
+
 resource "azurerm_virtual_machine" "vm" {
   lifecycle {
     ignore_changes = [ # don't recreate existing disk
@@ -86,6 +105,15 @@ resource "azurerm_virtual_machine" "vm" {
     offer                 = var.image_id != null ? null : local.vm_offer
     sku                   = var.image_id != null ? null : local.vm_sku
     version               = var.image_id != null ? null : local.vm_version
+  }
+  
+  dynamic "plan" {
+    for_each = var.plan == null ? [] : ["plan"]
+    content {
+      name        	      = var.plan.name
+      product             = var.plan.product
+      publisher           = var.plan.publisher
+    }
   }
 
   storage_os_disk {
@@ -165,8 +193,10 @@ resource "azurerm_virtual_machine" "vm" {
     }
   }
 
-  #network_interface_ids  = [element(azurerm_network_interface.nic.*.id, count.index)]
-  network_interface_ids   = [element(concat(azurerm_network_interface.nic.*.id, list("")), count.index)]
+  network_interface_ids  = var.subnet_id_second_nic == null  ? [element(azurerm_network_interface.nic.*.id, count.index)] : [element(azurerm_network_interface.nic.*.id, count.index), element(azurerm_network_interface.nic2.*.id, count.index)]
+  #network_interface_ids   = [element(concat(azurerm_network_interface.nic.*.id, list("")), count.index)]
+
+  primary_network_interface_id = var.subnet_id_second_nic == null ? null : element(azurerm_network_interface.nic.*.id, count.index)
 
   tags = var.tags
 }

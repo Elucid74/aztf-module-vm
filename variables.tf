@@ -218,3 +218,33 @@ variable "data_disk_size" {
 variable "enable_proximity_place_group" {
   default = false
 }
+
+variable "plan" {
+  default = null
+  
+/* example
+  default = {
+      name      = "fortinet_fg-vm_payg_20190624"
+      product   = "fortinet_fortigate-vm_v5"
+      publisher = "fortinet"
+  }
+*/
+}
+
+# variables added for Gateway Load Balancer Demo 
+variable "add_second_nic" {
+  default = false
+}
+
+variable "subnet_id_second_nic" {
+  default = null
+}
+
+variable "subnet_prefix_second_nic" {
+  default = null
+}
+
+variable "public_ip_id_second_nic" {
+  default = null
+}
+
