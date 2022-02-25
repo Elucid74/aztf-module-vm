@@ -60,7 +60,7 @@ resource "azurerm_lb_backend_address_pool" "lb" {
 }
 
 resource "azurerm_lb_rule" "ha" {
-  count                           = var.load_balancer_param.sku == "Gateway" ? 1 : 0
+  count                           = var.load_balancer_param == null ? 0 : (var.load_balancer_param.sku == "Gateway" ? 0 : 1)
 
   resource_group_name             = azurerm_lb.lb.0.resource_group_name
   loadbalancer_id                 = azurerm_lb.lb.0.id
