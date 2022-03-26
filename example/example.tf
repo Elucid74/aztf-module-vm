@@ -43,16 +43,7 @@ module "example" {
   source  = "../"
   #source  = "github.com/hyundonk/aztf-module-vm"
 
-  #instances = var.nodes
-  instances = {
-    name          = "example"
-
-    vm_num            = 1
-    vm_size           = "Standard_D4s_v3"
-    subnet_ip_offset  = 4
-
-    image_id          = var.image_id
-  }
+  instances = var.nodes
 
   location                          = var.location
   resource_group_name               = local.RESOURCEGROUP
@@ -61,12 +52,14 @@ module "example" {
   subnet_prefix                     = module.virtual_network.subnet_prefix_map["frontend"]
 
   admin_username                    = var.adminusername
-  #admin_password                    = var.adminpassword
+  admin_password                    = var.adminpassword
 
-  custom_data                       = var.bootstrapIgnition
+  # specify cloud_init script if needed
+  #custom_data                       = var.bootstrapIgnition
 
-  ssh_key_data                      = file("./sshkey/sshkey.pub")
-  ssh_key_path                      = "/home/${var.adminusername}/.ssh/authorized_keys"
+  # specify ssh_key_data and ssh_key_path when using ssh key
+  #ssh_key_data                      = file("./sshkey/sshkey.pub")
+  #ssh_key_path                      = "/home/${var.adminusername}/.ssh/authorized_keys"
 
   public_ip_id                      = module.example_pip.public_ip["0"].id
 }

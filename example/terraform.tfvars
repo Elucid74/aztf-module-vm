@@ -41,7 +41,6 @@ nodes = {
 
 # below is for illustration purpose. In actual environment, do not specifiy user credentials in the code. Instead use key vault or environmental variable such as TF_VAR_adminusername, TF_VAR_adminpassword. 
 adminusername = "theusername"
-adminpassword = "thePassw0rd"
 
 #image_id          = "enter image id here when using custom image rather than market place image"
 
