@@ -153,6 +153,11 @@ variable "application_insights_key" {
   default = null
 }
 
+variable "load_balancer_ip" {
+  description = "load balancer IP (internal)"
+  default = null
+}
+
 variable "load_balancer_param" {
   description = "load balancer parameters"
   type = object({
@@ -184,6 +189,16 @@ variable "backend_outbound_address_pool_id" {
 variable "backend_address_pool_id" {
   description = "Application Gateway backend address pool id"
   default = null	
+}
+
+variable "os_disk_size" {
+  description = "OS Disk Size in GB"
+  default = null	
+}
+
+variable "os_disk_type" {
+  description = "OS Disk Type"
+  default = "Premium_LRS"
 }
 
 variable "data_disk_size" {
