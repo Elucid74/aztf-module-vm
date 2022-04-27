@@ -41,7 +41,7 @@ resource "azurerm_proximity_placement_group" "ppg" {
 
 resource "azurerm_network_interface" "nic" {
   count 					                      = local.vm_num
-  name         													= var.load_balancer_param == null ? "${local.vm_name}-nic" : format("%s%02d-nic", local.vm_name, count.index + 1)
+  name                                  = var.load_balancer_param == null ? "${local.vm_name}-nic" : format("%s%02d%s-nic", local.vm_name, count.index + 1, local.postfix)
 
   location            	                = var.location
   resource_group_name  	                = var.resource_group_name
@@ -53,7 +53,6 @@ resource "azurerm_network_interface" "nic" {
     
     # if subnet_ip_offset is not set, use dynamic ip address. If load balancer is used, reserve the first ip to load balancer and assign the next ip address(es) to vm(s)
     private_ip_address                = local.subnet_ip_offset == null ? null : var.load_balancer_param == null? cidrhost(var.subnet_prefix, local.subnet_ip_offset + count.index) : (var.load_balancer_ip != null ? cidrhost(var.subnet_prefix, local.subnet_ip_offset + count.index): cidrhost(var.subnet_prefix, local.subnet_ip_offset + 1 + count.index))
-
     public_ip_address_id              = var.public_ip_id     == null ? null : var.public_ip_id
   }
   
@@ -63,12 +62,13 @@ resource "azurerm_network_interface" "nic" {
 resource "azurerm_virtual_machine" "vm" {
   lifecycle {
     ignore_changes = [ # don't recreate existing disk
-      storage_os_disk
+      storage_os_disk,
+      storage_data_disk,
 		]
   }
 
   count					                        = local.vm_num
-  name                  								= var.load_balancer_param == null ? local.vm_name: local.postfix == null ? format("%s%02d", local.vm_name, count.index + 1) : format("%s%02d%s", local.vm_name, count.index + 1, local.postfix) 
+  name                                  = var.load_balancer_param == null ? local.vm_name: local.postfix == null ? format("%s%02d", local.vm_name, count.index + 1) : format("%s%02d%s", local.vm_name, count.index + 1, local.postfix) 
 
   location        	   	                = var.location
   resource_group_name 	                = var.resource_group_name
